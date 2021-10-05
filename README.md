@@ -10,7 +10,7 @@ Replaces a tile with your current brush tile, either in your selected layer(s) o
 
 ### Automap Helper
 A collection of several scripts to make automapping less tedious.
-##### Add/Remove UIDs to/from Selected Layers
+#### Add/Remove UIDs to/from Selected Layers
 Useful to temporarily give layers unique names even when Automapping requires them to be the same, to aid copypasting in multiple layers at once.
 #### Generate Automap Layers
 Creates multiple input or output layers at once, optionally filling them with tiles from your brush.
