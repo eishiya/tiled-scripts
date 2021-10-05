@@ -1,3 +1,9 @@
+/*	Adds a "Center View on Map" action in the View menu, default hotkey Home.
+	Puts the map in the centre of your screen, useful for returning to a map
+	after scrolling away to other parts of a world.
+	Does not change the current zoom.
+*/
+
 var action = tiled.registerAction("CenterView", function(action) {
 	var map = tiled.activeAsset;
 	if(!map || !map.isTileMap) return;
