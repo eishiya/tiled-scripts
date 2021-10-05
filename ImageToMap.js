@@ -4,6 +4,11 @@
 	If the map is too small to fit the result, it will be resized.
 	Any existing map content will not be touched.
 	
+	By default, this script attempts to make a map that has the same
+	*pixel size* as the source image. If you have a map where each pixel
+	corresponds to a tile, you'll need to set the map's imageScale
+	property (see below) to a value that's 1/(tile size).
+	
 	========= Setting up your map =========
 	The image to use should be set with a custom File property on the map called "mapImage".
 	
