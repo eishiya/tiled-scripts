@@ -1,3 +1,16 @@
+/*	Adds an action to the Map menu that counts all the unique tiles in your map.
+	It produces two numbers:
+	- By ID, counting flipped variants as the same tile
+	- Counting rotations separately, flipped versions are considered to be
+		a different tile. This mode is useful for e.g. GB Studio, where
+		flipped versions of tiles are treated as unique tiles.
+	
+	This script does not look at the *content* of the tiles, which means it will
+	overcount tiles that look the same, and when counting rotations separately,
+	it will overcount symmetrical tiles.
+
+*/
+
 var action = tiled.registerAction("CountUsedTiles", function(action) {
 	var map = tiled.activeAsset;
 	if(!map || !map.isTileMap) {
