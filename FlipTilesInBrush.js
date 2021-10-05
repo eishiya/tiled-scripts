@@ -1,3 +1,11 @@
+/*	Adds actions to the Edit menu to flip tiles in the current brush
+	horizontally or vertically, while keeping their position.\
+	
+	Useful mainly in combination with Tiled's built-in brush flipping to flip
+	large arrangements of tiles without flipping each tile in them, but it's
+	useful for automapping and such too.
+*/
+
 var flipBrushHorizontally = tiled.registerAction("FlipTilesHorizontally", function(action) {
 	var brush = tiled.mapEditor.currentBrush;
 	
