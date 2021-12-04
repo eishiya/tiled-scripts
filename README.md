@@ -5,6 +5,8 @@ Usage instructions are in the comments at the top of each script.
 
 Feel free to use them as you wish. Credit appreciated but not required.
 
+If you're new to using Tiled scripts and don't know how to install them, please see the [Tiled docs on scripting](https://doc.mapeditor.org/en/stable/reference/scripting/#scripted-extensions).
+
 Brief descriptions of the included scripts:
 
 ### Replace Tile Tool
