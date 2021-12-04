@@ -1,12 +1,14 @@
 # Tiled Scripts
-Assorted scripts for Tiled Map Editor, written by eishiya. Usage instructions in the comments.
+Assorted scripts for Tiled Map Editor, written by eishiya.
+
+Usage instructions are in the comments at the top of each script.
 
 Feel free to use them as you wish. Credit appreciated but not required.
 
 Brief descriptions of the included scripts:
 
 ### Replace Tile Tool
-Replaces a tile with your current brush tile, either in your selected layer(s) or everywhere in the map. Unlike Select Same Tile + Bucket Fill, it reconciles the existing flips with the new ones.
+Replaces a tile with your current brush tile, either in your selected layer(s) or everywhere in the map. Unlike Select Same Tile + Bucket Fill, it reconciles the existing flips with the new ones. If you need to replace a large number of tiles and/or replace tiles across many maps, see the Mass Replace Tiles script.
 
 ### Automap Helper
 A collection of several scripts to make automapping less tedious.
@@ -25,3 +27,6 @@ Counts the tiles used in a map, useful for e.g. GB Studio where the unique tiles
 
 ### Image to Map
 Generates a TileMap based on a source image by matching colours from the image to tiles, using user-defined color: tileID pairs. Useful for turning schematic map sketches into TileMaps.
+
+### Mass Replace Tiles
+Replaces tiles en masse, according to a guide map that specifies the tile to replace in an "old" layer and the replacements in a "new" layer. Includes an extra action to run the replacer on all open maps. Useful for when you need to rearrange the tiles in a tileset, or replace an old tileset with a new one that's arranged differently.
