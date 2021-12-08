@@ -1,13 +1,14 @@
 # Tiled Scripts
 Assorted scripts for Tiled Map Editor, written by eishiya.
 
-Usage instructions are in the comments at the top of each script.
-
-Feel free to use them as you wish. Credit appreciated but not required.
+Usage instructions are in the comments at the top of each script. Feel free to use these scripts as you wish. Credit appreciated but not required.
 
 If you're new to using Tiled scripts and don't know how to install them, please see the [Tiled docs on scripting](https://doc.mapeditor.org/en/stable/reference/scripting/#scripted-extensions).
 
 Brief descriptions of the included scripts:
+
+### Move Tiles Tool
+Allows you to move selected tiles by dragging them instead of cut+pasting, similar to image editors' Move tools. Hold shift when starting to move to copy instead of cut. Also allows nudging with the keyboard. Click to commit the move.
 
 ### Replace Tile Tool
 Replaces a tile with your current brush tile, either in your selected layer(s) or everywhere in the map. Unlike Select Same Tile + Bucket Fill, it reconciles the existing flips with the new ones. If you need to replace a large number of tiles and/or replace tiles across many maps, see the Mass Replace Tiles script.
