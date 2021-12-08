@@ -1,11 +1,11 @@
 # Tiled Scripts
-Assorted scripts for Tiled Map Editor, written by eishiya.
+Assorted scripts for [Tiled Map Editor](https://www.mapeditor.org/), written by eishiya.
 
 Usage instructions are in the comments at the top of each script. Feel free to use these scripts as you wish. Credit appreciated but not required.
 
-If you're new to using Tiled scripts and don't know how to install them, please see the [Tiled docs on scripting](https://doc.mapeditor.org/en/stable/reference/scripting/#scripted-extensions).
+If you're new to using Tiled scripts and don't know how to install them, please see the [Tiled docs on scripting](https://doc.mapeditor.org/en/stable/reference/scripting/#scripted-extensions). Check out more scripts from the Tiled community in [mapeditor/tiled-extensions](https://github.com/mapeditor/tiled-extensions).
 
-Brief descriptions of the included scripts:
+Brief descriptions of the scripts in this repo:
 
 ### Move Tiles Tool
 Allows you to move selected tiles by dragging them instead of cut+pasting, similar to image editors' Move tools. Hold shift when starting to move to copy instead of cut. Also allows nudging with the keyboard. Click to commit the move.
@@ -16,7 +16,7 @@ Replaces a tile with your current brush tile, either in your selected layer(s) o
 **Warning**: The Replace Tile Tool currently ignores layers within groups, and does not work correctly on infinite maps.
 
 ### Automap Helper
-A collection of several scripts to make automapping less tedious.
+A collection of several actions to make automapping less tedious.
 #### Add/Remove UIDs to/from Selected Layers
 Useful to temporarily give layers unique names even when Automapping requires them to be the same, to aid copypasting in multiple layers at once.
 #### Generate Automap Layers
