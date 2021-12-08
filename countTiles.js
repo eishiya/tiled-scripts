@@ -1,4 +1,6 @@
-/*	Adds an action to the Map menu that counts all the unique tiles in your map.
+/*	Count Tiles by eishiya, last updated Dec 8 2021
+
+	Adds an action to the Map menu that counts all the unique tiles in your map.
 	It produces two numbers:
 	- By ID, counting flipped variants as the same tile
 	- Counting rotations separately, flipped versions are considered to be
@@ -9,6 +11,10 @@
 	overcount tiles that look the same, and when counting rotations separately,
 	it will overcount symmetrical tiles.
 
+	If you're using this for GB Studio, keep in mind that transparent tiles
+	overlapping over tiles will effectively create new "tiles", as will layers
+	that are offset. This script may undercount if these situations occur
+	in your map.
 */
 
 var action = tiled.registerAction("CountUsedTiles", function(action) {
@@ -29,16 +35,19 @@ var action = tiled.registerAction("CountUsedTiles", function(action) {
 	//Hold the running tallies of tiles:
 	var uniqueTiles = {}, uniqueRotations = {};
 	
-	var numLayers = map.layerCount;
-	for(var layerID = 0; layerID < numLayers; layerID++) {
-		var curLayer = map.layerAt(layerID);
+	function countTiles(curLayer) {
 		if(curLayer.isTileLayer && curLayer.visible) {
-			for(var x = 0; x < curLayer.width; x++) {
-				for(var y = 0; y < curLayer.height; y++) {
-					var cell = curLayer.cellAt(x, y);
+			//Get layer bounds:
+			let region = curLayer.region();
+			if(region) region = region.boundingRect;
+			if(!region) return;
+			
+			for(let x = region.x; x < region.x + region.width; ++x) {
+				for(let y = region.y; y < region.y + region.height; ++y) {
+					let cell = curLayer.cellAt(x, y);
 					if(cell.tileId > -1) {
-						var gid = cell.tileId; //no flips
-						var tileset = curLayer.tileAt(x, y).tileset;
+						let gid = cell.tileId; //no flips
+						let tileset = curLayer.tileAt(x, y).tileset;
 						//add the firstgid for this tile's tileset:
 						tileset = tilesets.indexOf(tileset);
 						if(tileset >= 0)
@@ -57,8 +66,15 @@ var action = tiled.registerAction("CountUsedTiles", function(action) {
 					}
 				}
 			}
+		} else if(curLayer.isGroupLayer || curLayer.isTileMap) {
+			var numLayers = curLayer.layerCount;
+			for(var layerID = 0; layerID < numLayers; layerID++) {
+				countTiles(curLayer.layerAt(layerID));
+			}
 		}
 	}
+	
+	countTiles(map);
 	
 	tiled.alert("Unique tiles by ID: " + Object.keys(uniqueTiles).length + "\n"
 		+ "Unique tiles (counting rotations separately): " + Object.keys(uniqueRotations).length
