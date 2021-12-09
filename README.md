@@ -13,8 +13,6 @@ Allows you to move selected tiles by dragging them instead of cut+pasting, simil
 ### Replace Tile Tool
 Replaces a tile with your current brush tile, either in your selected layer(s) or everywhere in the map. Unlike Select Same Tile + Bucket Fill, it reconciles the existing flips with the new ones. If you need to replace a large number of tiles and/or replace tiles across many maps, see the Mass Replace Tiles script.
 
-**Warning**: The Replace Tile Tool currently ignores layers within groups, and does not work correctly on infinite maps.
-
 ### Automap Helper
 A collection of several actions to make automapping less tedious.
 #### Add/Remove UIDs to/from Selected Layers
