@@ -1,14 +1,19 @@
-/*	Replace Tile Tool by eishiya, last updated Sep 2021
+/*	Replace Tile Tool by eishiya, last updated 8 Dec 2021
+
 	Adds a tool to your Map Toolbar that aids in replacing Tiles.
 	
-	It can do three things:
+	It can do the following:
 	- Left click: Replaces the tile you clicked on with your current tile in
 		all selected, unlocked layers.
-	- (any modifier) + left click: Replaces the tile you clicked on with your
-		current layers in ALL layers, including unselected and locked layers.
-		Useful for mass replace.
 	- Right click: Sample the clicked tile, useful to choose a tile to replace
 		others with.
+	- Hold Shift: Replaces the tile you clicked on with your current layers in
+		ALL layers, including unselected and locked layers.
+		Useful for mass replace.
+	- Hold Alt: Replaces Tile Objects in addition to tiles. Currently only means
+		anything when combined with Shift, as tiles aren't sampled from Objects.
+		The Tile Object's horizontal and vertical flips are reconciled with
+		the flip of the replacement tile, but diagonal flips are ignored.
 	
 	When replacing tiles, the original tile's rotation/flip flags are reconciled
 	(XOR) with the new tile's. This means that if you replace a tile with
@@ -19,15 +24,20 @@
 	
 	It is recommended to include the ReplaceTile.png icon with this script,
 	so that the tool shows up with that icon, instead of a big text button.
+	
+	If you need to replace a large number of tiles and/or replace tiles across
+	many maps, see the Mass Replace Tiles script:
+	https://github.com/eishiya/tiled-scripts/blob/main/MassReplaceTiles.js
 */
 
 var tool = tiled.registerTool("ReplaceTile", {
 	name: "Replace Tile",
 	icon: "ReplaceTile.png",
-	
+	 
 	replaceAll: false, //should all instances of the tile be replaced, or only those on selected layers?
 	isActive: false,
-	
+	replaceObjects: false,
+
 	activated: function() {
 		this.isActive = true;
 	},
@@ -42,13 +52,19 @@ var tool = tiled.registerTool("ReplaceTile", {
 				//if(!this.map || !this.preview) return;
 				//this.map.merge(this.preview); //Unreliable, because it uses layer names to decide which layers to merge ):
 				
-				//Until merging is improved, redo the whole tile-replacement logic when committing:
+				//Until merging is improved, redo the whole tile-replacement logic when committing, to ensure layers with repeated names are affected correctly:
 				if(!this.map || this.map.selectedLayers.length < 1) return;
 				
 				//Get the tile to replace:
 				var selectedLayer = this.map.selectedLayers[0];
-				if(!selectedLayer || !selectedLayer.isTileLayer) return;
-				var originalTile = selectedLayer.tileAt(this.tilePosition.x, this.tilePosition.y);
+				if(!selectedLayer) return;
+				let originalTile = null;
+				if(selectedLayer.isTileLayer) {
+					originalTile = selectedLayer.tileAt(this.tilePosition.x, this.tilePosition.y);
+				}/* else if(selectedLayer.isObjectLayer) {
+					//Selecting tiles from objects is not yet supported because Object Alignment and rotations make this rather complicated, with no help from the scripting API
+				}*/
+				if(!originalTile) return;
 				
 				//Get the flags:
 				var flags = 0;
@@ -83,8 +99,15 @@ var tool = tiled.registerTool("ReplaceTile", {
 	
 	modifiersChanged: function(modifiers) {
 		if(this.isActive) {
-			if(modifiers > 0) this.replaceAll = true;
-			else this.replaceAll = false;
+			if(modifiers & Qt.ShiftModifier || modifiers & Qt.ControlModifier)
+				this.replaceAll = true;
+			else
+				this.replaceAll = false;
+			
+			if(modifiers & Qt.AltModifier)
+				this.replaceObjects = true;
+			else
+				this.replaceObjects = false;
 			
 			this.showPreview();
 		}
@@ -99,13 +122,16 @@ var tool = tiled.registerTool("ReplaceTile", {
 			if(!this.selectedTile) {
 				this.statusInfo = "No replacement tile selected.";
 			} else {
-				var selectedLayer = this.map.selectedLayers[0];
+				let selectedLayer = this.map.selectedLayers[0];
 				if(!selectedLayer) {
 					this.statusInfo = "No layer selected (probably a Tiled glitch, just move your cursor to try again).";
 				} else if(selectedLayer.isTileLayer) {
-					var originalTile = selectedLayer.tileAt(this.tilePosition.x, this.tilePosition.y);
+					let originalTile = selectedLayer.tileAt(this.tilePosition.x, this.tilePosition.y);
 					this.statusInfo = this.tilePosition.x + ", " + this.tilePosition.y + " [" + (originalTile? originalTile.id : "empty") + " → "+this.selectedTile.id + "]";
+				} else if(selectedLayer.isObjectLayer) {
+					this.statusInfo = "Targeting Objects for tile replacement is not currently supported, please switch to a Tile Layer.";
 				} else {
+					//this.statusInfo = "The selected layer is not a Tile Layer or Object Layer.";
 					this.statusInfo = "The selected layer is not a Tile Layer.";
 				}
 			}
@@ -115,19 +141,20 @@ var tool = tiled.registerTool("ReplaceTile", {
 	replaceTile: function(oldTile, newTile, flags, isPreview) {
 		if(!this.map) return;
 		
-		var preview = this.preview;
-		var startX = 0, endX = this.map.width;
-		var startY = 0, endY = this.map.height;
+		let preview = this.preview;
+		let startX = 0, endX = this.map.width;
+		let startY = 0, endY = this.map.height;
 		if(this.map.selectedArea && this.map.selectedArea.boundingRect.width > 0 && this.map.selectedArea.boundingRect.height > 0) {
 			startX = this.map.selectedArea.boundingRect.x;
 			endX = startX + this.map.selectedArea.boundingRect.width;
 			startY = this.map.selectedArea.boundingRect.y;
 			endY = startY + this.map.selectedArea.boundingRect.height;
 		}
-		//Iterate over all the layers and tiles to replace:
-		var numLayers = this.map.layerCount;
-		for(var layerID = 0; layerID < numLayers; layerID++) {
-			var curLayer = this.map.layerAt(layerID);
+		
+		let tempThis = this;
+		
+		//Recursively replace tiles in layers:
+		function replaceTileInLayer(curLayer) {
 			if(curLayer.isTileLayer) {
 				if(isPreview) {
 					newLayer = new TileLayer();
@@ -135,7 +162,7 @@ var tool = tiled.registerTool("ReplaceTile", {
 					newLayer.visible = curLayer.visible;
 					newLayer.resize(curLayer.size);
 				}
-				if(this.replaceAll || (!curLayer.locked && this.map.selectedLayers.indexOf(curLayer) >= 0) ) {
+				if(tempThis.replaceAll || (!curLayer.locked && tempThis.map.selectedLayers.indexOf(curLayer) >= 0) ) {
 					if(isPreview)
 						layerEdit = newLayer.edit();
 					else
@@ -149,13 +176,35 @@ var tool = tiled.registerTool("ReplaceTile", {
 					}
 					layerEdit.apply();
 				}
-				if(isPreview) preview.addLayer(newLayer);
+				if(isPreview)
+					preview.addLayer(newLayer);
+			} else if(curLayer.isObjectLayer) {
+				if(tempThis.replaceObjects && !isPreview && (tempThis.replaceAll || (!curLayer.locked && tempThis.map.selectedLayers.indexOf(curLayer) >= 0)) ) {
+					for(let obj = 0; obj < curLayer.objectCount; ++obj) {
+						let mapObj = curLayer.objectAt(obj);
+						if(mapObj.tile && mapObj.tile == oldTile) {
+							mapObj.tile = newTile;
+							if(flags & Tile.FlippedHorizontally)
+								mapObj.tileFlippedHorizontally = !mapObj.tileFlippedHorizontally;
+							if(flags & Tile.FlippedVertically)
+								mapObj.tileFlippedVertically = !mapObj.tileFlippedVertically;
+						}
+						
+					}
+				}
+			} else if(curLayer.isGroupLayer || curLayer.isTileMap) {
+				let numLayers = curLayer.layerCount;
+				for(let layerID = 0; layerID < numLayers; layerID++) {
+					replaceTileInLayer(curLayer.layerAt(layerID));
+				}
 			}
 		}
+
+		replaceTileInLayer(this.map);
 		if(isPreview)
 			this.preview = preview;
 	}, //replaceTile
-	
+
 	showPreview: function() {
 		if(!this.map || this.map.selectedLayers.length < 1) return;
 		
