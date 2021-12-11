@@ -1,4 +1,4 @@
-/*	Replace Tile Tool by eishiya, last updated 8 Dec 2021
+/*	Replace Tile Tool by eishiya, last updated 11 Dec 2021
 
 	Adds a tool to your Map Toolbar that aids in replacing Tiles.
 	
@@ -7,13 +7,14 @@
 		all selected, unlocked layers.
 	- Right click: Sample the clicked tile, useful to choose a tile to replace
 		others with.
-	- Hold Shift: Replaces the tile you clicked on with your current layers in
-		ALL layers, including unselected and locked layers.
-		Useful for mass replace.
+	- Hold Shift: Replaces the tile you clicked on with your current tile in
+		ALL layers, including unselected and locked layers, and ignores
+		any current tile and object selection. Useful for mass replace.
 	- Hold Alt: Replaces Tile Objects in addition to tiles. Currently only means
 		anything when combined with Shift, as tiles aren't sampled from Objects.
 		The Tile Object's horizontal and vertical flips are reconciled with
-		the flip of the replacement tile, but diagonal flips are ignored.
+		the flip of the replacement tile, but diagonal flips are ignored,
+		this Tool will never rotate or move your Objects.
 	
 	When replacing tiles, the original tile's rotation/flip flags are reconciled
 	(XOR) with the new tile's. This means that if you replace a tile with
@@ -34,7 +35,7 @@ var tool = tiled.registerTool("ReplaceTile", {
 	name: "Replace Tile",
 	icon: "ReplaceTile.png",
 	 
-	replaceAll: false, //should all instances of the tile be replaced, or only those on selected layers?
+	replaceAll: false,
 	isActive: false,
 	replaceObjects: false,
 
@@ -131,7 +132,6 @@ var tool = tiled.registerTool("ReplaceTile", {
 				} else if(selectedLayer.isObjectLayer) {
 					this.statusInfo = "Targeting Objects for tile replacement is not currently supported, please switch to a Tile Layer.";
 				} else {
-					//this.statusInfo = "The selected layer is not a Tile Layer or Object Layer.";
 					this.statusInfo = "The selected layer is not a Tile Layer.";
 				}
 			}
@@ -141,16 +141,7 @@ var tool = tiled.registerTool("ReplaceTile", {
 	replaceTile: function(oldTile, newTile, flags, isPreview) {
 		if(!this.map) return;
 		
-		let preview = this.preview;
-		let startX = 0, endX = this.map.width;
-		let startY = 0, endY = this.map.height;
-		if(this.map.selectedArea && this.map.selectedArea.boundingRect.width > 0 && this.map.selectedArea.boundingRect.height > 0) {
-			startX = this.map.selectedArea.boundingRect.x;
-			endX = startX + this.map.selectedArea.boundingRect.width;
-			startY = this.map.selectedArea.boundingRect.y;
-			endY = startY + this.map.selectedArea.boundingRect.height;
-		}
-		
+		let preview = this.preview;		
 		let tempThis = this;
 		
 		//Recursively replace tiles in layers:
@@ -167,10 +158,25 @@ var tool = tiled.registerTool("ReplaceTile", {
 						layerEdit = newLayer.edit();
 					else
 						layerEdit = curLayer.edit();
-					for(var x = startX; x < endX && x < curLayer.width; x++) {
-						for(var y = startY; y < endY && y < curLayer.height; y++) {
-							if(oldTile == curLayer.tileAt(x, y)) {
-								layerEdit.setTile(x, y, newTile, curLayer.flagsAt(x, y) ^ flags);
+
+					let region = tempThis.map.selectedArea;
+					if(tempThis.replaceAll || !region || region.boundingRect.width <= 0 || region.boundingRect.height <= 0) {
+						region = curLayer.region();
+					}
+					
+					let rects;
+					if(region.rects) rects = region.rects();
+					else rects = [region.boundingRect];
+					
+					for(let r = 0; r < rects.length; ++r) {
+						let curRect = rects[r];
+						let endX = curRect.x + curRect.width;
+						let endY = curRect.y + curRect.height;
+						for(let x = curRect.x; x < endX; ++x) {
+							for(let y = curRect.y; y < endY; ++y) {
+								if(oldTile == curLayer.tileAt(x, y)) {
+									layerEdit.setTile(x, y, newTile, curLayer.flagsAt(x, y) ^ flags);
+								}
 							}
 						}
 					}
@@ -182,6 +188,8 @@ var tool = tiled.registerTool("ReplaceTile", {
 				if(tempThis.replaceObjects && !isPreview && (tempThis.replaceAll || (!curLayer.locked && tempThis.map.selectedLayers.indexOf(curLayer) >= 0)) ) {
 					for(let obj = 0; obj < curLayer.objectCount; ++obj) {
 						let mapObj = curLayer.objectAt(obj);
+						//if(!tempThis.replaceAll && !mapObj.selected /*&& selectedObjects.length > 0*/) continue; //if an object isn't selected but other objects are, skip it (except when doing replaceAll, of course)
+						// ^ For now, replaceAll is always active if an Object Layer is going to be affected. And the Tiled API has no easy way to get a count selected Objects.
 						if(mapObj.tile && mapObj.tile == oldTile) {
 							mapObj.tile = newTile;
 							if(flags & Tile.FlippedHorizontally)
@@ -229,6 +237,7 @@ var tool = tiled.registerTool("ReplaceTile", {
 		var preview = new TileMap();
 		preview.setSize(this.map.width, this.map.height);
 		preview.setTileSize(this.map.tileWidth, this.map.tileHeight);
+		preview.infinite = this.map.infinite;
 		this.preview = preview;
 	}
 });
