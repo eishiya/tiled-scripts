@@ -165,7 +165,7 @@ var tool = tiled.registerTool("ReplaceTile", {
 					}
 					
 					let rects;
-					if(region.rects) rects = region.rects();
+					if(region.rects) rects = region.rects;
 					else rects = [region.boundingRect];
 					
 					for(let r = 0; r < rects.length; ++r) {
