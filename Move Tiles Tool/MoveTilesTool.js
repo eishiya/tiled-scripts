@@ -1,4 +1,4 @@
-/*	Move Tiles Tool by eishiya, last updated Dec 8 2021
+/*	Move Tiles Tool by eishiya, last updated 14 Dec 2021
 
 	Adds a tool to your Map Toolbar that allows you to move selected tiles
 	relative to their original position using the mouse or the keyboard,
@@ -23,9 +23,17 @@
 	names when deciding which tiles go where.
 	
 	If you hold a modifier key when just starting to move the tiles,
-	the tiles will be copied instead of cut.
+	the tiles will be Copied instead of Cut.
 	
 	You can also use the keyboard to commit (Enter/Return) and cancel (Esc).
+	
+	Please note that this tool creates more Undo entries than a native tool
+	would, at least in Cut mode. Cutting out the tiles creates an Undo entry
+	for each affected layer. Cancelling creates an additional Undo entry when
+	the tiles are merged back into the map.
+	
+	In versions of Tiled before 1.8, only the bounding box of selections is
+	visible to scripts, so complex selections will not act as you might expect.
 */
 
 var tool = tiled.registerTool("MoveTiles", {
@@ -153,50 +161,64 @@ var tool = tiled.registerTool("MoveTiles", {
 		if(!this.map) return;
 		if(this.map.selectedLayers.length < 1) return;
 		
-		let selection = null;
+		let region = null;
 		
 		if(this.map.selectedArea) {
-			selection = {x: 0, y: 0, width: 0, height: 0}
-			//selection = this.map.selectedArea.boundingRect;
-			selection.x = this.map.selectedArea.boundingRect.x;
-			selection.y = this.map.selectedArea.boundingRect.y;
-			selection.width = this.map.selectedArea.boundingRect.width;
-			selection.height = this.map.selectedArea.boundingRect.height;
+			let selectedRegion = this.map.selectedArea.get();
+			region = {boundingRect: {x: 0, y: 0, width: 0, height: 0}};
 			
-			if(selection.width * selection.height == 0)
-				selection = null;
+			region.boundingRect.x = selectedRegion.boundingRect.x;
+			region.boundingRect.y = selectedRegion.boundingRect.y;
+			region.boundingRect.width = selectedRegion.boundingRect.width;
+			region.boundingRect.height = selectedRegion.boundingRect.height;
 			
+			if(region.boundingRect.width * region.boundingRect.height == 0) {
+				region = null;
+			} else {
+				if(selectedRegion.rects) {
+					let rects = selectedRegion.rects;
+					region.rects = [];
+					for(let r = 0; r < rects.length; ++r) {
+						let rect = rects[r];
+						region.rects.push({x: rect.x, y: rect.y, width: rect.width, height: rect.height}); //make extra sure it's a copy and not a reference
+					}
+				} else {
+					region.rects = [region.boundingRect];
+				}
+			}
+			//Clear the selection, so that merge works correctly:
 			this.map.selectedArea.set({x: 0, y: 0, width: 0, height: 0});
 		}
 		
-		if(!selection && !keyboardMode) {
-			selection = {x: this.tilePosition.x, y: this.tilePosition.y, width: 1, height: 1};
+		if(!region && !keyboardMode) {
+			region = {boundingRect: {x: this.tilePosition.x, y: this.tilePosition.y, width: 1, height: 1}};
+			region.rects = [region.boundingRect];
 		}
 		
-		if(!selection) return;
+		if(!region) return;
 		
 		this.brush = new TileMap();		
-		this.brush.setSize(selection.width, selection.height);
+		this.brush.setSize(region.boundingRect.width, region.boundingRect.height);
 		this.brush.setTileSize(this.map.tileWidth, this.map.tileHeight);
 		
-		this.currentPosition.x = selection.x;
-		this.currentPosition.y = selection.y;
+		this.currentPosition.x = region.boundingRect.x;
+		this.currentPosition.y = region.boundingRect.y;
 		
-		this.sourcePosition.x = selection.x;
-		this.sourcePosition.y = selection.y;
+		this.sourcePosition.x = region.boundingRect.x;
+		this.sourcePosition.y = region.boundingRect.y;
 		
 		if(this.cutTiles) this.tilesWereCut = true;
 		
 		//Add layers to the brush, and populate them:
-		if(this.addLayerToBrush(this.map, selection) > 0)
+		if(this.addLayerToBrush(this.map, region) > 0) {
 			this.tilesChosen = true;
+		}
 	},
 	
 	//Recursively adds this layer and its children to the brush, when appropriate
-	addLayerToBrush: function(curLayer, selection, overrideSelected) {
+	addLayerToBrush: function(curLayer, region, overrideSelected) {
 		if(!curLayer) return 0;
 		let brushTilesPlaced = 0;
-		//let originalTilesErased = 0;
 		if(curLayer.isTileLayer) {
 			if(this.map.selectedLayers.indexOf(curLayer) < 0) return 0; //ignore layers that aren't selected
 			let newLayer = new TileLayer();
@@ -207,16 +229,21 @@ var tool = tiled.registerTool("MoveTiles", {
 			let originalLayerEdit = null;
 			if(this.cutTiles) originalLayerEdit = curLayer.edit();
 			
+			let boundsX = region.boundingRect.x;
+			let boundsY = region.boundingRect.y;
+			
 			let layerEdit = newLayer.edit();
-			for(let x = 0; x < selection.width; ++x) {
-				for(let y = 0; y < selection.height; ++y) {
-					let tile = curLayer.tileAt(x+selection.x, y+selection.y);
-					if(tile) {
-						layerEdit.setTile( x, y, curLayer.tileAt(x+selection.x, y+selection.y), curLayer.flagsAt(x+selection.x, y+selection.y) );
-						brushTilesPlaced++;
-						if(originalLayerEdit) { //erase original tile
-							originalLayerEdit.setTile( x+selection.x, y+selection.y, null );
-							//originalTilesErased++;
+			for(let r = 0; r < region.rects.length; ++r) {
+				let rect = region.rects[r];
+				for(let x = 0; x < rect.width; ++x) {
+					for(let y = 0; y < rect.height; ++y) {
+						let tile = curLayer.tileAt(x+rect.x, y+rect.y);
+						if(tile) {
+							layerEdit.setTile( x + rect.x - boundsX, y + rect.y - boundsY, curLayer.tileAt(x+rect.x, y+rect.y), curLayer.flagsAt(x+rect.x, y+rect.y) );
+							brushTilesPlaced++;
+							if(originalLayerEdit) { //erase original tile
+								originalLayerEdit.setTile( x+rect.x, y+rect.y, null );
+							}
 						}
 					}
 				}
@@ -226,7 +253,7 @@ var tool = tiled.registerTool("MoveTiles", {
 			this.brush.addLayer(newLayer);
 		} else if(curLayer.isGroupLayer || curLayer.isTileMap) {
 			for(let gi = 0; gi < curLayer.layerCount; ++gi) {
-				brushTilesPlaced += this.addLayerToBrush(curLayer.layerAt(gi), selection);
+				brushTilesPlaced += this.addLayerToBrush(curLayer.layerAt(gi), region);
 			}
 		}
 		return brushTilesPlaced;
