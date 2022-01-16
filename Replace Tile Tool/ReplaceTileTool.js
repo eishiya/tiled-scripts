@@ -34,6 +34,7 @@
 var tool = tiled.registerTool("ReplaceTile", {
 	name: "Replace Tile",
 	icon: "ReplaceTile.png",
+	usesSelectedTiles: true,
 	 
 	replaceAll: false,
 	isActive: false,
