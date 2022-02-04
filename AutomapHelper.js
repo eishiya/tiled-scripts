@@ -1,4 +1,4 @@
-/* 	AutoMap Helper ver. 2021.03.22 by eishiya
+/* 	AutoMap Helper by eishiya, last modified 4 Feb 2022
 
 	This script adds several Actions to aid in the creation and editing of AutoMap rules.
 		In the Map menu:
@@ -11,7 +11,11 @@
 		- Convert Brush to Layers
 			Prepares your current brush for pasting to the selected layers by renaming its layers
 			or (for single-layer brushes) by moving each tile to its own layer.
-	You can read more about each tool in the comment section above each one.
+		In the Layer menu:
+		- Toggle //
+			Adds or removes // to/from the beginning of selected layers' names. Doesn't modify
+			Group Layer names. Toggling behaviour can be customised.
+	You can read more about each action in the comment section above each one.
 	
 	If you do not want some of these tools to clutter up your menus, you can easily
 	remove them by removing the * just below their description, which will turn
@@ -230,10 +234,6 @@ var uniquelyUnnameLayers = tiled.registerAction("RemoveUIDsFromLayerNames", func
 		for(var i = 0; i < layersList.length; ++i) {
 			var uid = "[uid:"+layersList[i].id+"]";
 			layersList[i].name = layersList[i].name.replace(uid, '');
-			//var uidEnd = layersList[i].name.indexOf("]");
-			//if(layersList[i].name.indexOf("[uid:") == 0 && uidEnd > 0) {
-			//	layersList[i].name = layersList[i].name.substring(uidEnd+1);
-			//}
 		}
 	});
 	
@@ -277,7 +277,6 @@ var brushToLayers = tiled.registerAction("ConvertBrushtoLayers", function(action
 			var brushLayer = brush.layerAt(0);
 			var brushWidth = brushLayer.width;
 			var brushHeight = brushLayer.height;
-			//var lastSeenTile, lastSeenFlags, lastSeenLayerName;
 			while(nextMapLayer < map.selectedLayers.length) {
 				while(nextMapLayer < map.selectedLayers.length && !map.selectedLayers[nextMapLayer].isTileLayer)
 					nextMapLayer++; //skip non-tile map layers
@@ -360,6 +359,56 @@ brushToLayers.text = "Convert Brush to Layers";
 
 tiled.extendMenu("Edit", [
     { action: "ConvertBrushtoLayers", before: "Preferences" },
+	{separator: true}
+]);
+/*=============================================================================*/
+
+/* 	Adds an action to the Layer menu that adds or removes // to/from
+	selected Layers' names, useful for disabling layers in Automapping.
+	This is most useful when combined with a keyboard shortcut.
+	
+	Group Layer names are left untouched, since Automapping ignores them.
+	
+	By default, the state of ALL layers is toggled based on the state of the
+	bottom-most non-Group layer. If you want each layer toggled individually,
+	set toggleIndividually to true.
+*/
+
+var toggleCommentLayer = tiled.registerAction("ToggleCommentLayer", function(action) {
+	// Should the state of each layer be toggled individually,
+	// or based on the state of the bottom-most layer?
+	let toggleIndividually = false;
+	
+	
+	let map = tiled.activeAsset;
+	if(!map || !map.isTileMap) {
+		return;
+	}
+
+	let lastSeenCommented = null;
+
+	map.macro("Toggle //", function() {
+		let selectedLayers = map.selectedLayers;
+		for(let li = 0; li < selectedLayers.length; ++li) {
+			let curLayer = selectedLayers[li];
+			if(curLayer.isGroupLayer) //ignore group layers
+				continue;
+			if(curLayer.name.indexOf("//") == 0) { //commented
+				if(lastSeenCommented === null) lastSeenCommented = true;
+				if(toggleIndividually || lastSeenCommented === true)
+					curLayer.name = curLayer.name.substring(2).trim();
+			} else { //uncommented
+				if(lastSeenCommented === null) lastSeenCommented = false;
+				if(toggleIndividually || lastSeenCommented === false)
+					curLayer.name = "//" + curLayer.name;
+			}
+		}
+	});
+});
+toggleCommentLayer.text = "Toggle //";
+
+tiled.extendMenu("Layer", [
+    { action: "ToggleCommentLayer", before: "LayerProperties" },
 	{separator: true}
 ]);
 /*=============================================================================*/
