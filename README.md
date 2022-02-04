@@ -21,6 +21,8 @@ Useful to temporarily give layers unique names even when Automapping requires th
 Creates multiple input or output layers at once, optionally filling them with tiles from your brush.
 #### Convert Brush to Layers
 Takes your brush and prepares it for pasting to the Selected Layers, either by renaming the layers of a multi-layer brush to match the selected layers, or (for single-layer brushes) by moving each tile to its own layer, named to match the selected layers. This action makes it possible to multi-layer paste to *different* layers.
+#### Toggle //
+Adds or removes `//` to/from selected layers' names, either individually or based on the comment state of the bottom layer. Hotkey this to quickly mark layers as ignored for Automapping in Tiled 1.8+.
 
 ### Center View on Map
 Centres the current map view on the map, useful to quickly go back to a map after panning around a large World.
