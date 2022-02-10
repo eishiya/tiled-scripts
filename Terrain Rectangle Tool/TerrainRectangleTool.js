@@ -1,4 +1,4 @@
-/*	Terrain Rectangle Tool by eishiya, last updated 18 Jan 2022
+/*	Terrain Rectangle Tool by eishiya, last updated 10 Feb 2022
 	Adds a tool to your Map Toolbar that draws rectangles and uses terrains
 	to decide which tiles to place.
 	
@@ -33,8 +33,6 @@
 	so if that tile is present but some others are not, the filled tiles will
 	remain.
 	
-	This tool currently disregards the probability of tiles.
-	
 	It is recommended to include the TerrainRectangle.png icon with this script,
 	so that the tool shows up with that icon, instead of a big text button.
 */
@@ -52,6 +50,7 @@ var terrainRectangleTool = tiled.registerTool("TerrainRectangle", {
 	currentTerrainSet: null,
 	rectangle: {x: 0, y: 0, width: 0, height: 0},
 	candidateTiles: [],
+	paintStyle: null, //Mixed terrains may behave as any of the three types depending on their labels
 	
 	activated: function() {
 		this.getTerrain();
@@ -176,7 +175,8 @@ var terrainRectangleTool = tiled.registerTool("TerrainRectangle", {
 					if(wangColor > 0) {
 						this.currentTerrain = wangColor;
 						this.currentTerrainSet = wangSet;
-						if(this.currentTerrainSet != oldTerrainSet || this.currentTerrain != oldTerrain) this.getCandidateTiles(this.currentTerrainSet);
+						if(this.currentTerrainSet != oldTerrainSet || this.currentTerrain != oldTerrain)
+							this.getCandidateTiles(this.currentTerrainSet);
 						return;
 					}
 				}
@@ -189,34 +189,56 @@ var terrainRectangleTool = tiled.registerTool("TerrainRectangle", {
 	},
 	
 	//Get a list of all tiles that have at least one corner/edge of the desired Terrain
+	//Also determines how to best use a Mixed terrain set for this color.
 	getCandidateTiles: function(wangSet) {
 		this.candidateTiles.length = 0;
 		if(!wangSet || this.currentTerrain < 0) return;
 		let tileset = wangSet.tileset;
 		let allTiles = tileset.tiles;
 		let allTilesLength = tileset.tiles.length;
+		let usesCorners = false, usesEdges = false; //Determine the usage type of Mixed terrains
+		
 		//Iterate all tiles in the tileset, and see which ones are in this terrain:
 		for(let tilei = 0; tilei < allTilesLength; ++tilei) {
 			let tile = allTiles[tilei];
 			if(!tile) continue; //Shouldn't be necessary, but Tiled is weird and sometimes tile is null
 			let wangId = wangSet.wangId(tile);
 			if(wangId) { //also shouldn't be necessary...
+				let pushed = false;
 				//Check its wang colors for at least one match:
 				for(let idi = 0; idi < wangId.length; ++idi) {
 					let wangColor = wangId[idi];
 					if(wangColor == this.currentTerrain) {
-						this.candidateTiles.push(tile);
-						break;
+						if(idi % 2 == 0) { //even = edge
+							usesEdges = true;
+						} else { //odd = corner
+							usesCorners = true;
+						}
+						if(!pushed) {
+							this.candidateTiles.push(tile);
+							pushed = true;
+							if(wangSet.type != WangSet.Mixed) break;
+						}
 					}
 				}
 			}
 		}
+		if(wangSet.type == WangSet.Mixed) {
+			if(usesCorners == usesEdges)
+				this.paintStyle = WangSet.Mixed;
+			else if(usesCorners)
+				this.paintStyle = WangSet.Corner;
+			else
+				this.paintStyle = WangSet.Edge;
+		} else
+			this.paintStyle = wangSet.type;
 	},
 	
 	getTilesByWangId: function(wangId) {
 		if(!wangId || wangId.length < 8) return null;
 		//Iterate through the candidate tiles and find a tile that matches what we want:
-		let type = this.currentTerrainSet.type;
+		//let type = this.currentTerrainSet.type;
+		let type = this.paintStyle; //Using the calculated type allows using Mixed tilesets with partial labels
 		let results = []; //results are {tile, flags}
 		//Build list of allowed transformations:
 		let transformations = [0];
@@ -305,8 +327,25 @@ var terrainRectangleTool = tiled.registerTool("TerrainRectangle", {
 		return wangId;
 	},
 	
+	//Returns a random tile from an array of tiles, taking tile probability into account
 	randomFrom: function(array) {
-		//TODO: Tile-specific random function that takes probability into account.
+		//Build a new array of these tiles, along with a running tally of tile probability sums:
+		let probabilitySum = 0;
+		let weightedArray = [];
+		for(let i = 0; i < array.length; ++i) {
+			let tile = array[i];
+			if(tile.tile.probability > 0) {
+				probabilitySum += tile.tile.probability;
+				weightedArray.push({tile: tile, sum: probabilitySum});
+			}
+		}
+		//Choose a random value between 0 and the probability sum:
+		let randomRoll = Math.random() * probabilitySum;
+		for(let i = 0; i < weightedArray.length; ++i) {
+			if(randomRoll < weightedArray[i].sum)
+				return weightedArray[i].tile;
+		}
+		//If we're still here, it means all the tiles had probability 0. Pick a random one:
 		return array[Math.floor(Math.random()*array.length)];
 	},
 	
