@@ -36,5 +36,8 @@ Counts the tiles used in a map, useful for e.g. GB Studio where the unique tiles
 ### Image to Map
 Generates a TileMap based on a source image by matching colours from the image to tiles, using user-defined color: tileID pairs. Useful for turning schematic map sketches into TileMaps.
 
+### Import Metatile Terrains
+Builds Terrain data for a metatileset by using the Terrain data from the source Tileset. Useful for speeding up Terrain creation for metatilesets, as the source tiles are usually fewer in number and easier to label. Only tested with orthographic tiles.
+
 ### Mass Replace Tiles
 Replaces tiles en masse, according to a guide map that specifies the tile to replace in an "old" layer and the replacements in a "new" layer. Includes an extra action to run the replacer on all open maps. Useful for when you need to rearrange the tiles in a tileset, or replace an old tileset with a new one that's arranged differently.
