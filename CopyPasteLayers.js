@@ -6,6 +6,16 @@
 	Copy Selected Layers: Copies the currently selected layers.
 	Paste Layers: Pastes the layers, each one is added as a new layer.
 	
+	The clipboard used by this script is independent of the usual clipboard
+	used for copy+pasting, and anything copied will be lost when scripts are
+	reloaded or when Tiled is restarted.
+	
+	Only selected layers are copied. This means that if you select a Group
+	but not its child layers, the child layers will NOT be pasted.
+	On the flipside, if you select some child layers but not the parent Group,
+	the child layers will be added to the first available parent (such as the
+	root map), and the unselected Group will not be copied.
+	
 	Possibly planned for the future:
 	Paste Layers (Merge): Would paste the layers, but attempt to paste into
 		existing layers (matching by name and group path) where possible.
