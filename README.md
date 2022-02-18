@@ -30,6 +30,9 @@ Adds or removes `//` to/from selected layers' names, either individually or base
 ### Center View on Map
 Centres the current map view on the map, useful to quickly go back to a map after panning around a large World.
 
+### Copy+Paste Layers
+Copies/pastes entire layers (as opposed to layer contents). Can copy/paste multiple layers at once, regardless of layer type.
+
 ### Count Tiles
 Counts the tiles used in a map, useful for e.g. GB Studio where the unique tiles allowed per map are limited, but tilesets may be large. Counts both by ID and by flips.
 
