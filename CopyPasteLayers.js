@@ -1,4 +1,4 @@
-/* 	Copy+Paste Layers by eishiya, last updated 17 Feb 2022
+/* 	Copy+Paste Layers by eishiya, last updated 18 Feb 2022
 
 	Adds actions to the Edit menu that let you copy and paste entire layers,
 	as opposed to only layer content.
@@ -15,6 +15,12 @@
 	On the flipside, if you select some child layers but not the parent Group,
 	the child layers will be added to the first available parent (such as the
 	root map), and the unselected Group will not be copied.
+	
+	CAUTION: If you're using a version of Tiled older than 1.8.2, make sure you
+	add all the tilesets used by the pasted layers to the destination map!
+	Older versions of Tiled don't automatically add the tilesets to the map,
+	so if you save the map without the tilesets being there, the tiles will be
+	empty when you load the map.
 	
 	Possibly planned for the future:
 	Paste Layers (Merge): Would paste the layers, but attempt to paste into
