@@ -65,9 +65,11 @@ CopyLayerHelpers.copyLayers = function(curLayer, parentGroup, copyAll, merge) {
 				newObject.text = curObject.text;
 				newObject.textAlignment = curObject.textAlignment;
 				newObject.textColor = curObject.textColor;
-				newObject.tile = curObject.tile;
-				newObject.tileFlippedHorizontally = curObject.tileFlippedHorizontally;
-				newObject.tileFlippedVertically = curObject.tileFlippedVertically;
+				if(curObject.tile) {
+					newObject.tile = curObject.tile;
+					newObject.tileFlippedHorizontally = curObject.tileFlippedHorizontally;
+					newObject.tileFlippedVertically = curObject.tileFlippedVertically;
+				}
 				newObject.type = curObject.type;
 				newObject.visible = curObject.visible;
 				newObject.wordWrap = curObject.wordWrap;
