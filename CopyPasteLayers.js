@@ -1,4 +1,4 @@
-/* 	Copy+Paste Layers by eishiya, last updated 18 Feb 2022
+/* 	Copy+Paste Layers by eishiya, last updated 1 Mar 2022
 
 	Adds actions to the Edit menu that let you copy and paste entire layers,
 	as opposed to only layer content.
@@ -10,11 +10,13 @@
 	used for copy+pasting, and anything copied will be lost when scripts are
 	reloaded or when Tiled is restarted.
 	
-	Only selected layers are copied. This means that if you select a Group
-	but not its child layers, the child layers will NOT be pasted.
-	On the flipside, if you select some child layers but not the parent Group,
-	the child layers will be added to the first available parent (such as the
-	root map), and the unselected Group will not be copied.
+	Unselected layers within groups are also copied by default. You can change
+	this behaviour to strictly copy only those layers that are directly selected
+	by changing `CopyLayerHelpers.ignoreUnselectedChildren` to true below.
+	
+	If you select some child layers but not the parent Group, the child layers
+	will be added to the first available parent (such as the root map),
+	and the unselected Group will not be copied.
 	
 	CAUTION: If you're using a version of Tiled older than 1.8.2, make sure you
 	add all the tilesets used by the pasted layers to the destination map!
@@ -28,6 +30,9 @@
 */
 var CopyLayerHelpers = {};
 CopyLayerHelpers.clipboard = null;
+//Set this to true to NOT copy the unselected children of selected groups:
+CopyLayerHelpers.ignoreUnselectedChildren = false;
+
 CopyLayerHelpers.copyLayers = function(curLayer, parentGroup, copyAll, merge) {
 	if(!parentGroup || !(parentGroup.isTileMap || parentGroup.isGroupLayer) )
 		return null;
@@ -93,7 +98,11 @@ CopyLayerHelpers.copyLayers = function(curLayer, parentGroup, copyAll, merge) {
 			//selected group, may also have selected children
 			let numLayers = curLayer.layerCount;
 			for(let layerID = 0; layerID < numLayers; layerID++) {
-				let child = CopyLayerHelpers.copyLayers(curLayer.layerAt(layerID), newLayer, copyAll, merge);
+				let child = null;
+				if(CopyLayerHelpers.ignoreUnselectedChildren)
+					child = CopyLayerHelpers.copyLayers(curLayer.layerAt(layerID), newLayer, copyAll, merge);
+				else
+					child = CopyLayerHelpers.copyLayers(curLayer.layerAt(layerID), newLayer, true, merge);
 				if(child)
 					newLayer.addLayer(child);
 			}
