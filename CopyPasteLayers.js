@@ -5,6 +5,8 @@
 	
 	Copy Selected Layers: Copies the currently selected layers.
 	Paste Layers: Pastes the layers, each one is added as a new layer.
+			The layers are pasted above the top-most selected layer,
+			or at the top of the layer stack if no layers are selected.
 	
 	The clipboard used by this script is independent of the usual clipboard
 	used for copy+pasting, and anything copied will be lost when scripts are
@@ -166,13 +168,43 @@ CopyLayerHelpers.pasteLayersAction = tiled.registerAction("PasteLayers", functio
 	if(!map || !map.isTileMap)
 		return;
 	
+	let targetLayer = map;
+	let targetIndex = -1;
+	
+	//recursive helper function to find the topmost selected layer:
+	function findTopmostLayer(parentLayer) {
+		let numLayers = parentLayer.layerCount;
+		for(let layerID = numLayers-1; layerID >= 0; layerID--) {
+			let candidate = parentLayer.layerAt(layerID);
+			if(candidate.selected) {
+				targetLayer = parentLayer;
+				targetIndex = layerID;
+				return candidate;
+			}
+			if(candidate.isGroupLayer) {
+				candidate = findTopmostLayer(candidate);
+				if(candidate)
+					return candidate;
+			}
+		}
+		return null;
+	}
+	
+	if(findTopmostLayer(map) === null) {
+		targetLayer = map;
+		targetIndex = map.layerCount-1;
+	} //else, the values are already set
+	
 	//Recursively iterate all the copied layers and add them to the map:
 	map.macro("Paste Layers", function() {
 		let numLayers = CopyLayerHelpers.clipboard.layerCount;
 		for(let layerID = 0; layerID < numLayers; layerID++) {
 			let newLayer = CopyLayerHelpers.copyLayers(CopyLayerHelpers.clipboard.layerAt(layerID), map, true, false);
-			if(newLayer)
-				map.addLayer(newLayer);
+			if(newLayer) {
+				//map.addLayer(newLayer); //add the layer at the top
+				targetLayer.insertLayerAt(targetIndex+1, newLayer); //add the layer above the found layer
+				targetIndex++; //increase the index for the next insertion
+			}
 		}
 	});
 });
