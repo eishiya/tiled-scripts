@@ -1,4 +1,4 @@
-/* 	Copy+Paste Layers by eishiya, last updated 13 Mar 2022
+/* 	Copy+Paste Layers by eishiya, last updated 14 Mar 2022
 
 	Adds actions to the Edit menu that let you copy and paste entire layers,
 	as opposed to only layer content.
@@ -73,6 +73,7 @@ CopyLayerHelpers.copyLayers = function(curLayer, parentGroup, copyAll, merge) {
 				newObject.polygon = curObject.polygon;
 				newObject.x = curObject.x;
 				newObject.y = curObject.y;
+				newObject.parallaxFactor = curObject.parallaxFactor;
 				newObject.rotation = curObject.rotation;
 				newObject.shape = curObject.shape;
 				newObject.text = curObject.text;
@@ -168,32 +169,18 @@ CopyLayerHelpers.pasteLayersAction = tiled.registerAction("PasteLayers", functio
 	if(!map || !map.isTileMap)
 		return;
 	
-	let targetLayer = map;
-	let targetIndex = -1;
-	
-	//recursive helper function to find the topmost selected layer:
-	function findTopmostLayer(parentLayer) {
-		let numLayers = parentLayer.layerCount;
-		for(let layerID = numLayers-1; layerID >= 0; layerID--) {
-			let candidate = parentLayer.layerAt(layerID);
-			if(candidate.selected) {
-				targetLayer = parentLayer;
-				targetIndex = layerID;
-				return candidate;
-			}
-			if(candidate.isGroupLayer) {
-				candidate = findTopmostLayer(candidate);
-				if(candidate)
-					return candidate;
-			}
-		}
-		return null;
-	}
-	
-	if(findTopmostLayer(map) === null) {
+	//Find the top-most layer so we know where to add the pasted layers:
+	let topLayer = map.selectedLayers;
+	topLayer = topLayer[topLayer.length-1];
+	let targetIndex;
+	let targetLayer = topLayer? topLayer.parentLayer : map;
+	if(!targetLayer) targetLayer = map;
+	if(topLayer) {
+		targetIndex = targetLayer.layers.indexOf(topLayer) + 1;
+	} else {
 		targetLayer = map;
-		targetIndex = map.layerCount-1;
-	} //else, the values are already set
+		targetIndex = map.layerCount;
+	}
 	
 	//Recursively iterate all the copied layers and add them to the map:
 	map.macro("Paste Layers", function() {
@@ -201,8 +188,7 @@ CopyLayerHelpers.pasteLayersAction = tiled.registerAction("PasteLayers", functio
 		for(let layerID = 0; layerID < numLayers; layerID++) {
 			let newLayer = CopyLayerHelpers.copyLayers(CopyLayerHelpers.clipboard.layerAt(layerID), map, true, false);
 			if(newLayer) {
-				//map.addLayer(newLayer); //add the layer at the top
-				targetLayer.insertLayerAt(targetIndex+1, newLayer); //add the layer above the found layer
+				targetLayer.insertLayerAt(targetIndex, newLayer); //add the layer above the found layer
 				targetIndex++; //increase the index for the next insertion
 			}
 		}
