@@ -1,4 +1,4 @@
-/* 	Copy+Paste Layers by eishiya, last updated 1 Mar 2022
+/* 	Copy+Paste Layers by eishiya, last updated 13 Mar 2022
 
 	Adds actions to the Edit menu that let you copy and paste entire layers,
 	as opposed to only layer content.
