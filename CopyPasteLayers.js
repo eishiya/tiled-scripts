@@ -44,8 +44,6 @@ CopyLayerHelpers.copyLayers = function(curLayer, parentGroup, copyAll, merge) {
 		let newLayer = null;
 		if(curLayer.isTileLayer) {
 			newLayer = new TileLayer();
-			newLayer.width = curLayer.width;
-			newLayer.height = curLayer.height;
 			//Copy all the tiles:
 			let region = curLayer.region().boundingRect;
 			if(region.width > 0 && region.height > 0) {
