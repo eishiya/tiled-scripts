@@ -33,6 +33,9 @@ Centres the current map view on the map, useful to quickly go back to a map afte
 ### Copy+Paste Layers
 Copies/pastes entire layers, including their properties along with the content. Can copy/paste multiple layers at once, regardless of layer type.
 
+### Copy+Paste Terrains
+Copies/pastes terrains from/to selected tiles. Includes actions to copy/paste terrains exactly, as well as to copy/paste the arrangement of a particular terrain, so you can paste it as a different terrain.
+
 ### Count Tiles
 Counts the tiles used in a map, useful for e.g. GB Studio where the unique tiles allowed per map are limited, but tilesets may be large. Counts both by ID and by flips.
 
