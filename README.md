@@ -16,6 +16,9 @@ Replaces a tile with your current brush tile, either in your selected layer(s) o
 ### Terrain Rectangle Tool
 Draws a rectangle using the currently selected terrain. Allows drawing large rectangles using Terrain sets that don't include concave corners and confuse the regular Terrain tools. Ctrl to ignore existing terrains in the map.
 
+### Apply Action to Open Documents
+Lets you choose any action in Tiled and run it on every open document. Useful for mass-applying scripted actions without making a separate "apply to all" action for all of them.
+
 ### Automap Helper
 A collection of several actions to make automapping less tedious.
 #### Add/Remove UIDs to/from Selected Layers
