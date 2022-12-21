@@ -7,6 +7,9 @@ If you're new to using Tiled scripts and don't know how to install them, please 
 
 Brief descriptions of the scripts in this repo:
 
+### Large Tile Stamp Tool
+Draws large tiles spaced out so they don't overlap each other. Right-click to sample tiles.
+
 ### Move Tiles Tool
 Allows you to move selected tiles by dragging them instead of cut+pasting, similar to image editors' Move tools. Hold shift when starting to move to copy instead of cut. Also allows nudging with the keyboard. Click to commit the move.
 
