@@ -1,4 +1,4 @@
-/*	Move Tiles Tool by eishiya, last updated 14 Dec 2021
+/*	Move Tiles Tool by eishiya, last updated 31 Dec 2022
 
 	Adds a tool to your Map Toolbar that allows you to move selected tiles
 	relative to their original position using the mouse or the keyboard,
@@ -22,8 +22,8 @@
 	that every tile layer in the map has a unique name, as Tiled uses layer
 	names when deciding which tiles go where.
 	
-	If you hold a modifier key when just starting to move the tiles,
-	the tiles will be Copied instead of Cut.
+	If you hold Ctrl or Alt when just starting to move the tiles, the tiles
+	will be Copied instead of Cut.
 	
 	You can also use the keyboard to commit (Enter/Return) and cancel (Esc).
 	
@@ -111,18 +111,22 @@ var tool = tiled.registerTool("MoveTiles", {
 		if(!this.tilesChosen) {
 			this.buildBrush(true);
 		}
+		let distance = 1;
+		if(modifiers & Qt.ShiftModifier) {
+			distance = 10; //TODO: Get and use the major grid sizes when those become available
+		}
 		switch(key) {
 			case Qt.Key_Down:
-				this.moveTiles(this.currentPosition.x, this.currentPosition.y+1);
+				this.moveTiles(this.currentPosition.x, this.currentPosition.y+distance);
 				break;
 			case Qt.Key_Left:
-				this.moveTiles(this.currentPosition.x-1, this.currentPosition.y);
+				this.moveTiles(this.currentPosition.x-distance, this.currentPosition.y);
 				break;
 			case Qt.Key_Up:
-				this.moveTiles(this.currentPosition.x, this.currentPosition.y-1);
+				this.moveTiles(this.currentPosition.x, this.currentPosition.y-distance);
 				break;
 			case Qt.Key_Right:
-				this.moveTiles(this.currentPosition.x+1, this.currentPosition.y);
+				this.moveTiles(this.currentPosition.x+distance, this.currentPosition.y);
 				break;
 			case Qt.Key_Enter:
 			case Qt.Key_Return:
@@ -140,8 +144,10 @@ var tool = tiled.registerTool("MoveTiles", {
 	},
 	
 	modifiersChanged: function(modifiers) {
-		if(modifiers > 0) this.cutTiles = false;
-		else this.cutTiles = true;
+		if(modifiers & Qt.ControlModifier || modifiers & Qt.AltModifier)
+			this.cutTiles = false;
+		else
+			this.cutTiles = true;
 	},
 	
 	updateStatusInfo: function () {
