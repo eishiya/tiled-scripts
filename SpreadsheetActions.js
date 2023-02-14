@@ -23,9 +23,11 @@
 	graphic and isometric maps, but may give inconsistent results on staggered
 	maps. You can set shiftObjects to false below to disable object shifting.
 	
+	This script will not modify locked layers by default. Prior to Tiled 1.10,
+	locked Tile Layers become unlocked when the map is resized, so this script
+	may not work as expected in older versions of Tiled.
 	If you want this script to modify even those layers that are locked, set
-	modifyLockedLayers to true below. Note that in some older builds of Tiled,
-	locked Tile Layers may appear unlocked to scripts.
+	modifyLockedLayers to true below.
 */
 
 var spreadsheetActions = {
