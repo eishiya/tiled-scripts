@@ -1,7 +1,7 @@
 /// <reference types="@mapeditor/tiled-api" />
 
 /* 	Spreadsheet Actions script by eishiya, last updated 14 Feb 2023
-	Object shifting added by edigeronimo
+	Object shifting by edigeronimo
 
 	Adds several actions to the Edit menu to insert and delete columns and rows
 	at a selection location. The selection size determines the number of columns
@@ -18,6 +18,10 @@
 	When inserting rows/columns and the selection is outside the map, additional
 	rows/columns may be inserted to ensure the map is large enough to include
 	the selected area.
+	
+	By default, this script also shifts over objects. This works well on ortho-
+	graphic and isometric maps, but may give inconsistent results on staggered
+	maps. You can set shiftObjects to false below to disable object shifting.
 */
 
 var spreadsheetActions = {
