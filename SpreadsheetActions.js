@@ -22,10 +22,18 @@
 	By default, this script also shifts over objects. This works well on ortho-
 	graphic and isometric maps, but may give inconsistent results on staggered
 	maps. You can set shiftObjects to false below to disable object shifting.
+	
+	If you want this script to modify even those layers that are locked, set
+	modifyLockedLayers to true below. Note that in some older builds of Tiled,
+	locked Tile Layers may appear unlocked to scripts.
 */
 
 var spreadsheetActions = {
+	//CONFIGURATION:
 	shiftObjects: true, //Set this to false if you don't want objects to be shifted over.
+	modifyLockedLayers: false, //Set this to true to modify even locked layers.
+	//END CONFIGURATION
+	
 	tileLayers: [], //List of layers on the current map.
 	objectLayers: [], //List of object layers on the current map.
 	savedSelection: null, //The user's selection, backed up before we mess with it.
@@ -83,6 +91,8 @@ var spreadsheetActions = {
 		spreadsheetActions.tileLayers.length = 0;
 		spreadsheetActions.objectLayers.length = 0;
 		function getLayers(layer) {
+			if( layer.locked && !spreadsheetActions.modifyLockedLayers )
+				return; //ignore locked layers. Locked groups are effectively locking all children.
 			if(layer.isTileMap || layer.isGroupLayer) {
 				for(let i = 0; i < layer.layerCount; ++i) {
 					getLayers(layer.layerAt(i));
