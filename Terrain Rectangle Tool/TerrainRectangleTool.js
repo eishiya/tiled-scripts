@@ -1,4 +1,4 @@
-/*	Terrain Rectangle Tool by eishiya, last updated 10 Feb 2022
+/*	Terrain Rectangle Tool by eishiya, last updated 28 Feb 2023
 	Adds a tool to your Map Toolbar that draws rectangles and uses terrains
 	to decide which tiles to place.
 	
@@ -41,6 +41,7 @@ var terrainRectangleTool = tiled.registerTool("TerrainRectangle", {
 	name: "Terrain Rectangle Tool",
 	icon: "TerrainRectangle.png",
 	usesWangSets: true,
+	targetLayerType: Layer.TileLayerType,
 	
 	ignoreSurroundings: false, //should the edges be placed as if all surround tiles are empty?
 	
