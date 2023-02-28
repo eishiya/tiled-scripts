@@ -1,4 +1,4 @@
-/*	Large Tile Stamp Tool by eishiya, last updated 21 Dec 2022
+/*	Large Tile Stamp Tool by eishiya, last updated 28 Feb 2023
 
 	Adds a tool to your Map Toolbar that works similarly to the Stamp Brush,
 	but will skip over cells in the map to avoid overlapping large tiles,
@@ -24,8 +24,15 @@
 	This tool does NOT support Tile Stamp variations, as those are not
 	exposed to the scripting API.
 	
-	TODO: Line mode with Shift. There's skeleton code for it already, just
+	TODO: Line mode with Shift. There's support code for it already, just
 	no actual line implementation.
+	
+	TODO: Automatically detect spaced-out tilestamps (e.g. due to copy+pasting)
+	and adjust them. Or maybe don't do it automatically, and instead provide
+	an Action to compact stamps.
+	
+	TODO: Support for flipping and rotating the brush.
+	For now, you can switch back to the regular brush stamp for this.
 */
 
 var tool = tiled.registerTool("LargeTileStampTool", {
@@ -34,6 +41,7 @@ var tool = tiled.registerTool("LargeTileStampTool", {
 	name: "Large Tile Stamp Tool",
 	icon: "LargeTileStamp.png",
 	usesSelectedTiles: true,
+	targetLayerType: Layer.TileLayerType,
 	mouseDown: false,
 	
 	lineMode: false, //Controlled via Shift modifier
@@ -120,8 +128,8 @@ var tool = tiled.registerTool("LargeTileStampTool", {
 	},
 
 	measureStamp: function(stamp) {
-		this.stampSize.width = stamp.width;
-		this.stampSize.height = stamp.height;
+		//this.stampSize.width = stamp.width;
+		//this.stampSize.height = stamp.height;
 		
 		let cellSize = {x: this.map.tileWidth, y: this.map.tileHeight};
 		let tileSize = {x: cellSize.x, y: cellSize.y}; //Don't worry about tiles smaller than the cell size
@@ -155,15 +163,15 @@ var tool = tiled.registerTool("LargeTileStampTool", {
 		//so we can calculate the tileStep and total stampSize
 		this.tileStep.x = Math.ceil(tileSize.x / cellSize.x);
 		this.tileStep.y = Math.ceil(tileSize.y / cellSize.y);
-		this.stampSize.x = this.tileStep.x * stamp.width;
-		this.stampSize.y = this.tileStep.y * stamp.height;
+		this.stampSize.width = this.tileStep.x * stamp.width;
+		this.stampSize.height = this.tileStep.y * stamp.height;
 	},
 	
 	drawStamp: function(x, y, stamp, map) {
 		//Calculate the top left corner of the stamp's location in the map, taking into account where it can and can't start:
 		let offset = {
-			x: Math.round((x - Math.floor(this.stampSize.x/2)) / this.tileStep.x) * this.tileStep.x,
-			y: Math.round((y - Math.floor(this.stampSize.y/2)) / this.tileStep.y) * this.tileStep.y
+			x: Math.round((x - Math.floor(this.stampSize.width/2)) / this.tileStep.x) * this.tileStep.x,
+			y: Math.round((y - Math.floor(this.stampSize.height/2)) / this.tileStep.y) * this.tileStep.y
 		};
 		if(this.alignToTopLeft) {
 			offset.y += (this.tileStep.y - 1);
@@ -199,13 +207,13 @@ var tool = tiled.registerTool("LargeTileStampTool", {
 		}
 		stampLayer(stamp);
 		
-	}, //drawStamp
+	},
 
 	showPreview: function() {
 		if(!this.map || this.map.selectedLayers.length < 1) return;
 		
 		this.preparePreview();
-		let stamp =  tiled.mapEditor.currentBrush;
+		let stamp = tiled.mapEditor.currentBrush;
 		this.measureStamp(stamp); //set the step and stamp size
 		
 		let destinationMap = this.preview;
