@@ -1,4 +1,4 @@
-/*	Move Tiles Tool by eishiya, last updated 31 Dec 2022
+/*	Move Tiles Tool by eishiya, last updated 28 Feb 2023
 
 	Adds a tool to your Map Toolbar that allows you to move selected tiles
 	relative to their original position using the mouse or the keyboard,
@@ -193,7 +193,7 @@ var tool = tiled.registerTool("MoveTiles", {
 				}
 			}
 			//Clear the selection, so that merge works correctly:
-			this.map.selectedArea.set({x: 0, y: 0, width: 0, height: 0});
+			this.map.selectedArea.set(Qt.rect(0,0,0,0));
 		}
 		
 		if(!region && !keyboardMode) {
