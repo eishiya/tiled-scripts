@@ -43,6 +43,8 @@ var tool = tiled.registerTool("MoveTiles", {
 	longClickTime: 300, //time, in ms, for a click to count as a drag. Clicks shorter than this will commit the changes.
 	//Note: Any click that crosses a tile boundary counts as a drag and will not commit the changes, regardless of length.
 	
+	targetLayerType: Layer.TileLayerType,
+	
 	isDragging: false, //true if we're dragging.
 	mouseHeld: false,
 	tilesChosen: false,
