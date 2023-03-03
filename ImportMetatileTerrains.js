@@ -1,4 +1,4 @@
-/* 	Import Metatile Terrains by eishiya, last updated 3 Feb 2022
+/* 	Import Metatile Terrains by eishiya, last updated 3 Mar 2023
 
 	Adds an action to the Tileset menu that imports and expands terrains from
 	a source tileset into the active metatileset. This allows you to label only
@@ -16,7 +16,7 @@
 */
 
 var importMetatileTerrains = tiled.registerAction("ImportMetatileTerrains", function(action) {
-	if(tiled.version < "1.8.0") {
+	if(tiled.versionLessThan? tiled.versionLessThan("1.8.0") : tiled.version < "1.8.0") {
 		tiled.alert("Import Metatile Terrains requires Tiled 1.8 or later.");
 		return;
 	}
