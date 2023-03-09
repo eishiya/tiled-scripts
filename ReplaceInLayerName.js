@@ -3,6 +3,8 @@
 	Adds an action to the Layer menu that lets you search and replace strings
 	in the names of selected layers.
 	
+	Requires Tiled 1.9+.
+	
 	This is useful when you need to bulk-rename layers, such as when changing
 	which layers some Automapping rules target.
 	
