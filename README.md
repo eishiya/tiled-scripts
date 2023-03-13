@@ -62,3 +62,6 @@ Renames selected layers by doing a search and replace in their name. Supports re
 
 ### Spreadsheet Actions
 Inserts and deletes rows and columns in your map, making it easier to expand and contract your map. Can also shift Objects over to match.
+
+### Tileset Heatmap
+Generates a heatmap of your tileset, making it easy to find over- and under-used tiles.
