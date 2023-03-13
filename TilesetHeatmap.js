@@ -155,11 +155,11 @@ tilesetHeatmap.generateTileset = function() {
 	
 	gradient.setPixel(0, 0, zeroColor);
 	for(let x = 1; x <= gradientWidth; x++) {
-		let colorPos = x / gradientWidth;
+		let colorPos = (x-1) / gradientWidth;
 		let start, end;
 		for(let i = gradientPoints.length - 1; i >= 0; i--) {
 			let point = gradientPoints[i];
-			if(point.start < colorPos) {
+			if(point.start <= colorPos) {
 				start = i;
 				break;
 			}
