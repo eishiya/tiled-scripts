@@ -1,4 +1,4 @@
-/* 	AutoMap Helper by eishiya, last modified 4 Feb 2022
+/* 	AutoMap Helper by eishiya, last modified 18 Mar 2023
 
 	This script adds several Actions to aid in the creation and editing of AutoMap rules.
 		In the Map menu:
@@ -268,6 +268,11 @@ var brushToLayers = tiled.registerAction("ConvertBrushtoLayers", function(action
 		tiled.alert("There are no layers selected. Brush was not changed.");
 		return;
 	}
+	
+	let repeatTiles = false; //If we have more layers than the brush has tiles, should we repeat tiles in the extra layers?
+	if(!tiled.versionLessThan && tiled.version < "1.9") //If tiled.versionLessThan exists, then we're in 1.10+
+		repeatTiles = true;
+	
 	var brush = tiled.mapEditor.currentBrush;
 	if( brush && brush.size.width > 0 && brush.size.height > 0 && brush.layerCount > 0 //the brush exists
 	&& (brush.size.width > 1 || brush.size.height > 1 || brush.layerAt(0).tileAt(0,0)) ) { //the brush contains tiles
@@ -305,7 +310,7 @@ var brushToLayers = tiled.registerAction("ConvertBrushtoLayers", function(action
 						layerEdit = brush.layerAt(0).edit();
 						layerEdit.setTile(nextBrushX, nextBrushY, null);
 						layerEdit.apply();
-					} else { //We're out of usable tiles in the brush, but still have layers to fill. Repeat the previous layer's tile.
+					} else if(repeatTiles) { //We're out of usable tiles in the brush, but still have layers to fill. Repeat the previous layer's tile.
 						var newLayer = new TileLayer(map.selectedLayers[nextMapLayer].name);
 						var layerEdit = newLayer.edit();
 						var previousLayer = brush.layerAt(brush.layerCount-1);
