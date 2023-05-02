@@ -60,6 +60,9 @@ Replaces tiles en masse, according to a guide map that specifies the tile to rep
 ### Replace in Layer Name
 Renames selected layers by doing a search and replace in their name. Supports regular expressions.
 
+### Select Child Layers
+Recursively selects the child layers of all selected groups.
+
 ### Spreadsheet Actions
 Inserts and deletes rows and columns in your map, making it easier to expand and contract your map. Can also shift Objects over to match.
 
