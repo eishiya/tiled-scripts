@@ -1,4 +1,4 @@
-/* 	Mass Replace Tiles script by eishiya, last updated 12 Apr 2023
+/* 	Mass Replace Tiles script by eishiya, last updated 2 May 2023
 
 	This script adds three actions to the Map menu to mass replace tiles in
 	a map, based on another map that provides the old tile -> new tile mappings.
@@ -71,6 +71,11 @@
 	unused before the replacer runs. Set removeUnusedOldTilesets to false below
 	if you don't want this script to ever remove tilesets.
 	
+	By default, empty tiles in the "new" layer are ignored and the corresponding
+	old tiles are not changed. This makes partial replacements of tilesets more
+	convenient. If you *do* want to replace tiles with empty, set
+	allowReplaceWithEmpty to true below.
+	
 	The mass replacer will not run a remapping map on itself, so don't worry
 	about messing it up by accidentally running the mass replacer on it.
 	However, it IS possible to mess up a remapping map by applying a different
@@ -97,7 +102,11 @@
 */
 
 let massReplaceTiles = tiled.registerAction("MassReplaceTiles", function(action) {
+	// =================== CONFIG ===================
 	let removeUnusedOldTilesets = true; //If true, any tilesets were used by the map before mass replacement but are no longer used after will be removed. Set to false to keep all tilesets. Any tilesets that were already not used will not be removed either way.
+	let allowReplaceWithEmpty = false; //If true, empty tiles in the "new" layer will count as valid replacements. If false, the "old" tile will not be changed.
+	// ==============================================
+	
 	let map = tiled.activeAsset;
 	
 	if(!map || !map.isTileMap) {
@@ -154,8 +163,7 @@ let massReplaceTiles = tiled.registerAction("MassReplaceTiles", function(action)
 	
 	//Read the remapping map and save all the replacements
 	if(!mappings) {
-		//mappings = {};
-		mappings = [];
+		mappings = new Map();
 		//Get the region occupied by old tiles, so we look at only those cells that are important:
 		let oldRegionRects = oldTiles.region().rects;
 		
@@ -164,11 +172,11 @@ let massReplaceTiles = tiled.registerAction("MassReplaceTiles", function(action)
 				for(let y = oldRect.y; y < oldRect.y + oldRect.height; y++) {
 					tile = oldTiles.tileAt(x, y);
 					if(tile) {
-						mappings.push({old: tile, tile: newTiles.tileAt(x, y), flags: oldTiles.flagsAt(x,y) ^ newTiles.flagsAt(x,y)});
-						//We may end up storing the same old tile multiple times, but we'll always grab the first one so the remapping is deterministic.
-						//This wastes some memory, but it's faster than checking whether the tile's arleady been added.
-						//Also, the reason we don't just store it as mappings[tile] is that object keys are converted to strings and this can sometimes produce different strings for the same tile for some reason.
-						//Doing it this way and comparing tiles to tiles instead of strings to strings is more reliable, even though finding the tiles is a little slower.
+						let newTile = newTiles.tileAt(x, y);
+						if(allowReplaceWithEmpty || newTile)
+							mappings.set( tile, {tile: newTile, flags: oldTiles.flagsAt(x,y) ^ newTiles.flagsAt(x,y)} );
+						//We must store a reference to the old tile to avoid it getting garbage-collected. This ensures tile references are consistent.
+						//Fortunately using a Map and the old tile as the key accomplishes that.
 					}
 				}
 			}
@@ -179,11 +187,7 @@ let massReplaceTiles = tiled.registerAction("MassReplaceTiles", function(action)
 	
 	function findReplacement(oldTile) {
 		if(!oldTile) return null;
-		for(let i = 0; i < mappings.length; i++) {
-			let mapping = mappings[i];
-			if(mapping.old == oldTile)
-				return mapping;
-		}
+		return mappings.get(oldTile);
 	}
 	
 	//Some functions for remapping a given layer:
@@ -346,7 +350,12 @@ if(projectAvailable) {
 		}
 		
 		//Recursively add all the maps in a folder to maps
+		let checkedFolders = {};
 		function collectMaps(folder) {
+			let canonicalPath = FileInfo.canonicalPath(folder);
+			if(checkedFolders[canonicalPath]) return;
+			
+			checkedFolders[canonicalPath] = true;
 			//First, get all the files in this folder
 			let files = File.directoryEntries(folder, File.Files | File.Readable | File.NoDotAndDotDot);
 			for(file of files) {
