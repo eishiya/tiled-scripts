@@ -1,7 +1,7 @@
-/* 	Copy+Paste Animations by eishiya, last updated 29 Aug 2022
+/* 	Copy+Paste Animations by eishiya, last updated 3 May 2023
 
-	Adds actions to the Tileset menu to Copy, Cut, and Paste Animations between
-	tiles.
+	Adds actions to the Tileset menu and tile right-click menus to
+	Copy, Cut, and Paste Animations between tiles.
 	
 	Note that Cutting is *immediate*, if you don't paste it, that data will be
 	gone forever (unless you Undo or paste it back where it was).
@@ -176,10 +176,38 @@ copyPasteAnimations.changeMode = tiled.registerAction("ChangeAnimationPasteMode"
 });
 copyPasteAnimations.changeMode.text = "Paste mode: "+copyPasteAnimations.pasteModes[copyPasteAnimations.currentPasteMode];
 
+//Enable the actions only when
+copyPasteAnimations.onAssetChanged = function() {
+	let asset = tiled.activeAsset;
+	if(asset.isTileset) {
+		copyPasteAnimations.copyAnimations.enabled = true;
+		copyPasteAnimations.cutAnimations.enabled = true;
+		copyPasteAnimations.pasteAnimations.enabled = true;
+		copyPasteAnimations.changeMode.enabled = true;
+	} else {
+		copyPasteAnimations.copyAnimations.enabled = false;
+		copyPasteAnimations.cutAnimations.enabled = false;
+		copyPasteAnimations.pasteAnimations.enabled = false;
+		copyPasteAnimations.changeMode.enabled = false;
+	}
+}
+copyPasteAnimations.onAssetChanged(); //Make sure the actions have the correct state
+tiled.activeAssetChanged.connect(copyPasteAnimations.onAssetChanged);
+
+//Tileset top menu:
 tiled.extendMenu("Tileset", [
 	{ action: "CopyTileAnimations", before: "TilesetProperties" },
 	{ action: "CutTileAnimations"},
 	{ action: "PasteTileAnimations"},
 	{ action: "ChangeAnimationPasteMode"},
 	{separator: true}
+]);
+//Tileset right-click menu:
+//This also adds them to the Tilesets panel's menu where they don't work, which is why we disable the actions for non-tileset documents
+tiled.extendMenu("TilesetView.Tiles", [
+	{separator: true},
+	{ action: "CopyTileAnimations"},
+	{ action: "CutTileAnimations"},
+	{ action: "PasteTileAnimations"},
+	{ action: "ChangeAnimationPasteMode"}
 ]);
