@@ -1,4 +1,4 @@
-/* 	Copy+Paste Animations by eishiya, last updated 3 May 2023
+/* 	Copy+Paste Animations by eishiya, last updated 4 May 2023
 
 	Adds actions to the Tileset menu and tile right-click menus to
 	Copy, Cut, and Paste Animations between tiles.
@@ -184,11 +184,19 @@ copyPasteAnimations.onAssetChanged = function() {
 		copyPasteAnimations.cutAnimations.enabled = true;
 		copyPasteAnimations.pasteAnimations.enabled = true;
 		copyPasteAnimations.changeMode.enabled = true;
+		copyPasteAnimations.copyAnimations.visible = true;
+		copyPasteAnimations.cutAnimations.visible = true;
+		copyPasteAnimations.pasteAnimations.visible = true;
+		copyPasteAnimations.changeMode.visible = true;
 	} else {
 		copyPasteAnimations.copyAnimations.enabled = false;
 		copyPasteAnimations.cutAnimations.enabled = false;
 		copyPasteAnimations.pasteAnimations.enabled = false;
 		copyPasteAnimations.changeMode.enabled = false;
+		copyPasteAnimations.copyAnimations.visible = false;
+		copyPasteAnimations.cutAnimations.visible = false;
+		copyPasteAnimations.pasteAnimations.visible = false;
+		copyPasteAnimations.changeMode.visible = false;
 	}
 }
 copyPasteAnimations.onAssetChanged(); //Make sure the actions have the correct state
@@ -203,7 +211,7 @@ tiled.extendMenu("Tileset", [
 	{separator: true}
 ]);
 //Tileset right-click menu:
-//This also adds them to the Tilesets panel's menu where they don't work, which is why we disable the actions for non-tileset documents
+//This also adds them to the Tilesets panel's menu where they don't work, which is why we hide the actions for non-tileset documents
 tiled.extendMenu("TilesetView.Tiles", [
 	{separator: true},
 	{ action: "CopyTileAnimations"},
