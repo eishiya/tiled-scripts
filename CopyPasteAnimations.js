@@ -1,4 +1,4 @@
-/* 	Copy+Paste Animations by eishiya, last updated 4 May 2023
+/* 	Copy+Paste Animations by eishiya, last updated 13 May 2023
 
 	Adds actions to the Tileset menu and tile right-click menus to
 	Copy, Cut, and Paste Animations between tiles.
@@ -179,7 +179,7 @@ copyPasteAnimations.changeMode.text = "Paste mode: "+copyPasteAnimations.pasteMo
 //Enable the actions only when
 copyPasteAnimations.onAssetChanged = function() {
 	let asset = tiled.activeAsset;
-	if(asset.isTileset) {
+	if(asset && asset.isTileset) {
 		copyPasteAnimations.copyAnimations.enabled = true;
 		copyPasteAnimations.cutAnimations.enabled = true;
 		copyPasteAnimations.pasteAnimations.enabled = true;
