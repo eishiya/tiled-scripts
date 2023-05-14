@@ -1,4 +1,4 @@
-/* 	Replace in Layer Name by eishiya, last updated 9 Mar 2023
+/* 	Replace in Layer Name by eishiya, last updated 14 May 2023
 
 	Adds an action to the Layer menu that lets you search and replace strings
 	in the names of selected layers.
@@ -75,6 +75,10 @@ replaceInLayerName.dialogOpen = false;
 replaceInLayerName.caseSensitive = true;
 
 tiled.extendMenu("Layer", [
-    { action: "ReplaceInLayerName", before: "LayerProperties" },
+	{ action: "ReplaceInLayerName", before: "LayerProperties" },
+	{separator: true}
+]);
+tiled.extendMenu("LayerView.Layers", [
+	{ action: "ReplaceInLayerName", before: "LayerProperties" },
 	{separator: true}
 ]);
