@@ -1,7 +1,7 @@
 /* 	Replace in Layer Name by eishiya, last updated 14 May 2023
 
-	Adds an action to the Layer menu that lets you search and replace strings
-	in the names of selected layers.
+	Adds an action to the Layer menu and layers panel right-click menu that
+	lets you search and replace strings in the names of selected layers.
 	
 	Requires Tiled 1.9+.
 	
