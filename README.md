@@ -42,6 +42,9 @@ Copies/pastes tile animations. It can copy the frames exactly, or adjust the fra
 ### Copy+Paste Layers
 Copies/pastes entire layers, including their properties along with the content. Can copy/paste multiple layers at once, regardless of layer type.
 
+### Copy+Paste Objects in Layers
+Copies/pastes objects, but remembers the names of the layers they came from and pastes them and pastes them to layers of those names, enabling multi-layer copy+paste similar to that for tiles.
+
 ### Copy+Paste Terrains
 Copies/pastes terrains from/to selected tiles. Includes actions to copy/paste terrains exactly, as well as to copy/paste the arrangement of a particular terrain, so you can paste it as a different terrain.
 
