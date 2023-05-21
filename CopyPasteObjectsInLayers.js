@@ -18,6 +18,7 @@ CopyObjectsInLayers.clipboard = null;
 CopyObjectsInLayers.copyObjectLayer = function(curLayer, dstLayer) {
 	let newLayer = null;
 	let copyAll = false;
+	let newObjects = [];
 	if(curLayer && curLayer.isObjectLayer) {
 		if(dstLayer && dstLayer.isObjectLayer) {
 			newLayer = dstLayer;
@@ -54,9 +55,11 @@ CopyObjectsInLayers.copyObjectLayer = function(curLayer, dstLayer) {
 			newObject.wordWrap = curObject.wordWrap;
 			
 			newLayer.addObject(newObject);
+			if(copyAll) newObjects.push(newObject);
 		}
 	}
-	return newLayer;
+	if(copyAll) return newObjects;
+	else return newLayer;
 }
 
 // Recursively iterates over all the Object layers in a map to find a layer with
@@ -132,6 +135,7 @@ CopyObjectsInLayers.paste = tiled.registerAction("PasteObjectsInLayers", functio
 	map.macro("Paste Objects in Layers", function() {
 		let numLayers = CopyObjectsInLayers.clipboard.layerCount;
 		let layerNameCounts = {};
+		let newObjects = [];
 		for(let layerID = 0; layerID < numLayers; layerID++) {
 			let srcLayer = CopyObjectsInLayers.clipboard.layerAt(layerID);
 			if(layerNameCounts[srcLayer.name] === undefined) layerNameCounts[srcLayer.name] = 0;
@@ -140,9 +144,12 @@ CopyObjectsInLayers.paste = tiled.registerAction("PasteObjectsInLayers", functio
 				dstLayer = new ObjectGroup(srcLayer.name);
 				map.addLayer(dstLayer);
 			}
-			CopyObjectsInLayers.copyObjectLayer(srcLayer, dstLayer);
+			let copiedObjects = CopyObjectsInLayers.copyObjectLayer(srcLayer, dstLayer);
+			for(obj of copiedObjects)
+				newObjects.push(obj);
 			layerNameCounts[srcLayer.name]++;
 		}
+		map.selectedObjects = newObjects;
 	});
 });
 CopyObjectsInLayers.paste.text = "Paste Objects in Layers";
@@ -198,3 +205,9 @@ tiled.extendMenu("Edit", [
 	{ action: "PasteObjectsInLayers" },
 	{ separator: true }
 ]);
+//And to the objects right click menu:
+/*tiled.extendMenu("MapView.Objects", [
+	{ action: "CopyObjectsInLayers" }, //this menu doesn't seem to have action names we can use for "before"
+	{ action: "PasteObjectsInLayers" },
+	{ separator: true }
+]);*/
