@@ -44,6 +44,8 @@ CopyLayerHelpers.copyLayers = function(curLayer, parentGroup, copyAll, merge) {
 		let newLayer = null;
 		if(curLayer.isTileLayer) {
 			newLayer = new TileLayer();
+			newLayer.width = curLayer.width;
+			newLayer.height = curLayer.height;
 			//Copy all the tiles:
 			let region = curLayer.region().boundingRect;
 			if(region.width > 0 && region.height > 0) {
@@ -71,7 +73,6 @@ CopyLayerHelpers.copyLayers = function(curLayer, parentGroup, copyAll, merge) {
 				newObject.polygon = curObject.polygon;
 				newObject.x = curObject.x;
 				newObject.y = curObject.y;
-				newObject.parallaxFactor = curObject.parallaxFactor;
 				newObject.rotation = curObject.rotation;
 				newObject.shape = curObject.shape;
 				newObject.text = curObject.text;
@@ -119,6 +120,7 @@ CopyLayerHelpers.copyLayers = function(curLayer, parentGroup, copyAll, merge) {
 		newLayer.opacity = curLayer.opacity;
 		newLayer.tintColor = curLayer.tintColor;
 		newLayer.visible = curLayer.visible;
+		newLayer.parallaxFactor = curLayer.parallaxFactor;
 		return newLayer;	
 	} else if(curLayer.isGroupLayer) {
 		//Unselected group layer. May have selected children.
@@ -195,7 +197,7 @@ CopyLayerHelpers.pasteLayersAction = tiled.registerAction("PasteLayers", functio
 CopyLayerHelpers.pasteLayersAction.text = "Paste Layers";
 
 tiled.extendMenu("Edit", [
-    { action: "CopyLayers", before: "SelectAll" },
-    { action: "PasteLayers" },
-	{separator: true}
+	{ action: "CopyLayers", before: "SelectAll" },
+	{ action: "PasteLayers" },
+	{ separator: true }
 ]);
