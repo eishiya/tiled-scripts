@@ -1,4 +1,4 @@
-/* 	AutoMap Helper by eishiya, last modified 18 Mar 2023
+/* 	AutoMap Helper by eishiya, last modified 6 Aug 2023
 
 	This script adds several Actions to aid in the creation and editing of AutoMap rules.
 		In the Map menu:
@@ -183,8 +183,8 @@ var automapHelper = tiled.registerAction("CreateAutomapLayers", function(action)
 automapHelper.text = "Generate AutoMap Layers";
 
 tiled.extendMenu("Map", [
-    { action: "CreateAutomapLayers", before: "SelectNextTileset" },
-	{separator: true}
+	{ action: "CreateAutomapLayers", before: "SelectNextTileset" },
+	{ separator: true }
 ]);
 /*=============================================================================*/
 
@@ -241,9 +241,9 @@ var uniquelyUnnameLayers = tiled.registerAction("RemoveUIDsFromLayerNames", func
 uniquelyUnnameLayers.text = "Remove UIDs from Selected Layers";
 
 tiled.extendMenu("Edit", [
-    { action: "AddUIDsToLayerNames", before: "Preferences" },
-    { action: "RemoveUIDsFromLayerNames"},
-	{separator: true}
+	{ action: "AddUIDsToLayerNames", before: "Preferences" },
+	{ action: "RemoveUIDsFromLayerNames"},
+	{ separator: true }
 ]);
 /*=============================================================================*/
 
@@ -338,6 +338,8 @@ var brushToLayers = tiled.registerAction("ConvertBrushtoLayers", function(action
 				if(nextBrushY >= brushHeight) {
 					brush.setSize(1, 1);
 				}
+				//Remove the original first layer, which is now empty:
+				brush.removeLayerAt(0);
 			}
 		} else { //rename the existing layers
 			var nextBrushLayer = 0;
@@ -363,8 +365,8 @@ var brushToLayers = tiled.registerAction("ConvertBrushtoLayers", function(action
 brushToLayers.text = "Convert Brush to Layers";
 
 tiled.extendMenu("Edit", [
-    { action: "ConvertBrushtoLayers", before: "Preferences" },
-	{separator: true}
+	{ action: "ConvertBrushtoLayers", before: "Preferences" },
+	{ separator: true }
 ]);
 /*=============================================================================*/
 
@@ -413,7 +415,7 @@ var toggleCommentLayer = tiled.registerAction("ToggleCommentLayer", function(act
 toggleCommentLayer.text = "Toggle //";
 
 tiled.extendMenu("Layer", [
-    { action: "ToggleCommentLayer", before: "LayerProperties" },
-	{separator: true}
+	{ action: "ToggleCommentLayer", before: "LayerProperties" },
+	{ separator: true }
 ]);
 /*=============================================================================*/
