@@ -51,6 +51,9 @@ Copies/pastes terrains from/to selected tiles. Includes actions to copy/paste te
 ### Count Tiles
 Counts the tiles used in a map, useful for e.g. GB Studio where the unique tiles allowed per map are limited, but tilesets may be large. Counts both by ID and by flips.
 
+### Delete Collisions
+Deletes collision shapes from selected tiles in a Tileset.
+
 ### Image to Map
 Generates a TileMap based on a source image by matching colours from the image to tiles, using user-defined color: tileID pairs. Useful for turning schematic map sketches into TileMaps.
 
