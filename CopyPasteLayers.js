@@ -1,4 +1,4 @@
-/* 	Copy+Paste Layers by eishiya, last updated 14 Mar 2022
+/* 	Copy+Paste Layers by eishiya, last updated 26 Aug 2023
 
 	Adds actions to the Edit menu that let you copy and paste entire layers,
 	as opposed to only layer content.
@@ -86,6 +86,8 @@ CopyLayerHelpers.copyLayers = function(curLayer, parentGroup, copyAll, merge) {
 				newObject.type = curObject.type;
 				newObject.visible = curObject.visible;
 				newObject.wordWrap = curObject.wordWrap;
+				
+				newObject.setProperties(curObject.properties());
 				
 				newLayer.addObject(newObject);
 			}
