@@ -39,6 +39,9 @@ Centres the current map view on the map, useful to quickly go back to a map afte
 ### Copy+Paste Animations
 Copies/pastes tile animations. It can copy the frames exactly, or adjust the frames relative to the destination tile(s).
 
+### Copy+Paste Collisions
+Copies/pastes tile collisions in the Tileset Editor, makes it easier to copy complex collisions across groups of tiles.
+
 ### Copy+Paste Layers
 Copies/pastes entire layers, including their properties along with the content. Can copy/paste multiple layers at once, regardless of layer type.
 
