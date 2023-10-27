@@ -7,6 +7,9 @@ If you're new to using Tiled scripts and don't know how to install them, please 
 
 Brief descriptions of the scripts in this repo:
 
+### Force Edge Terrain Tool
+An alternative Terrain Brush that lets you paint with Mixed Terrains as if they were edge terrains, making it easier to draw thin paths, rivers, etc without making separate Edge Terrains for them.
+
 ### Large Tile Stamp Tool
 Draws large tiles spaced out so they don't overlap each other. Right-click to sample tiles.
 
