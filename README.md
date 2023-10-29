@@ -67,7 +67,7 @@ Generates a TileMap based on a source image by matching colours from the image t
 Builds Terrain data for a metatileset by using the Terrain data from the source Tileset. Useful for speeding up Terrain creation for metatilesets, as the source tiles are usually fewer in number and easier to label. Only tested with orthographic tiles.
 
 ### Mass Replace Tiles
-Replaces tiles en masse, according to a guide map that specifies the tile to replace in an "old" layer and the replacements in a "new" layer. Includes an extra action to run the replacer on all open maps. Useful for when you need to rearrange the tiles in a tileset, or replace an old tileset with a new one that's arranged differently.
+Replaces tiles *en masse*, according to a guide map that specifies the tile to replace in an "old" layer and the replacements in a "new" layer. Includes actions to run the replacer on all open maps, or on all maps in a Project. Useful for when you need to rearrange the tiles in a tileset, replace an old tileset with a new one that's arranged differently, or create multiple sets of similarly structured Automapping rules.
 
 ### Modify Selection
 Expands and contracts (erodes) selections in maps.
