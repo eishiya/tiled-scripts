@@ -1,4 +1,4 @@
-/* 	Mass Replace Tiles script by eishiya, last updated 2 May 2023
+/* 	Mass Replace Tiles script by eishiya, last updated 29 Oct 2023
 
 	This script adds three actions to the Map menu to mass replace tiles in
 	a map, based on another map that provides the old tile -> new tile mappings.
@@ -8,7 +8,7 @@
 	
 	The first action, "Mass Replace Tiles", replaces tiles in the currently
 	active map. When run from the menu, it will look for a "remappingMap" File
-	property on the map and use that as the source of remappings.
+	property on the map or prompt you for a remapping map to use.
 	
 	The second action, "Mass Replace Tiles In Open Maps", will run the "Mass
 	Replace Tiles" action on all open maps. If the currently open document looks
@@ -22,7 +22,7 @@
 	All instances of the old tiles will be replaced by the corresponding
 	new tiles, both when used on Tile Layers, and when used as Tile Objects.
 	
-	Requires Tiled 1.8+.
+	Requires Tiled 1.8+, but works best in 1.9+.
 	Mass Replace Tiles in Project requires Tiled 1.10.1+.
 	
 	
@@ -47,19 +47,22 @@
 		
 	====================== Setting up your map to modify ======================
 	When your remapping map is ready, you will need to tell this script
-	to use it. 
+	to use it.
 	
-	If you use "Mass Replace Tiles In Open Maps", then run that action with
-	the remapping map as your active document and you will be prompted whether
-	you want to use that map.
+	When you want to Mass Replace Tiles in a single map, the easiest option is
+	to have your remapping map open in Tiled, go to the map you want to modify,
+	and run "Mass Replace Tiles". The script will detect that you have a
+	remapping map open and ask you if you want to use it.
+
+	If you use the "In Open Maps" or "In Project" batch actions with
+	the remapping map as your active document, you will be prompted whether
+	you want to use that map. If you select "No", the script will instead look
+	for a "remappingMap" custom File property on each map, and use that map
+	if it's set, and not modify any maps without a "remappingMap" property.
 	
-	Otherwise, you can specify the remapping map to use for each of your maps.
-	In the map(s) that you want to replace tiles in, create a custom property
-	of type File called "remappingMap" and set it to the remapping map file.
-	
-	Hint: After setting the "remappingMap" property, if you click its name,
-	you can copy the property, and then paste it into any other maps that
-	need to use the same remapping.
+	The "remappingMap" property can also be used when modifying a single map;
+	if set, it will be used instead of prompting you for the map to use, which
+	can be useful if you need to run the replacer many times on the same map.
 	
 	You can remove the "remappingMap" property after you're done using
 	the mass tile replacer.
@@ -89,7 +92,7 @@
 	If you're using this script to aid in the reorganization of a single
 	tileset, I recommend making the new version a separate tileset, so you
 	can see both old and new tiles correctly in your remapping and can see
-	which tiles correspond to which other tiles.
+	how the riles correspond to one another.
 	
 	If a tile appears more than once in the "old" layer, the first mapping found
 	will be used. This is usually the leftmost and uppermost occurrence.
@@ -123,13 +126,84 @@ let massReplaceTiles = tiled.registerAction("MassReplaceTiles", function(action)
 	} else {
 		remapper = map.property("remappingMap");
 		if(!remapper) {
-			if(!massReplaceTiles.silentMode) tiled.alert("Error: No \"remappingMap\" custom property set on this map. This should be a File property pointing to your map of tile remappings.");
-			return;
+			/*if(!massReplaceTiles.silentMode) tiled.alert("Error: No \"remappingMap\" custom property set on this map. This should be a File property pointing to your map of tile remappings.");
+			return;*/
+			if(massReplaceTiles.silentMode) return;
+			
+			//get list of open maps:
+			let maps = [];
+			let mapNames = [];
+			for(asset of tiled.openAssets) {
+				if(asset == map || !asset.isTileMap)
+					continue;
+				
+				//check if this is a valid remapping map:
+				let oldTiles = false, newTiles = false;
+				for(let li = 0; li < asset.layerCount; ++li) {
+					let layer = asset.layerAt(li);
+					if(layer.name.toLowerCase() == "old" && layer.isTileLayer)
+						oldTiles = true;
+					else if(layer.name.toLowerCase() == "new" && layer.isTileLayer)
+						newTiles = true;
+				}
+				if(!oldTiles || !newTiles)
+					continue;
+				
+				//It's valid, save it to the list:
+				maps.push(asset);
+				if(map.fileName) {
+					mapNames.push(FileInfo.fileName(map.fileName));
+				} else { //unsaved map
+					let mapName = "Unsaved map (";
+					
+					if(map.infinite) mapName += "infinite"; //TODO: Get used region?
+					else mapName += (map.width + " x " + map.height);
+					
+					mapName += ")";
+					mapNames.push(mapName);
+				}
+			}
+			if(maps.length == 0) {
+				tiled.alert("Error: This map has no \"remappingMap\" custom property, and no remapping maps were found open in Tiled. Please either create a File property called \"remappingMap\" and set it to the remapper you want to use, or open the remapping map in Tiled.");
+				return;
+			} else if(maps.length == 1) {
+				let choice = tiled.confirm("This map doesn't have a \"remappingMap\" custom property set, but you appear to have a valid remapping map "+mapNames[0]+" open. Would you like to use it as the remapping map?");
+				if(choice)
+					remapper = maps[0];
+				else
+					return;
+			} else if(tiled.versionLessThan || tiled.version.startsWith("1.9")) { //We can check for 1.10+ by checking for versionLessThan, and for 1.9 by checking the version string. Dialogs require 1.9+
+				let dialog = new Dialog("Choose a remapping map");
+				dialog.addLabel("Multiple valid remappingMaps were found open in Tiled.\nWhich would you like to use?");
+				dialog.addNewRow();
+				let dropdown = dialog.addComboBox("", mapNames);
+				let choice = 0;
+				dropdown.currentIndex = choice;
+				dropdown.currentIndexChanged.connect( function() {choice = dropdown.currentIndex;} );
+				let okButton = dialog.addButton("OK");
+				let cancelButton = dialog.addButton("Cancel");
+				cancelButton.clicked.connect(function() {dialog.reject()});
+				okButton.clicked.connect(function() {dialog.accept()});
+				let result = dialog.exec();
+				if(result == Dialog.Rejected)
+					return;
+				else {
+					if(choice < 0 || choice > maps.length)
+						return;
+					else remapper = maps[choice];
+				}
+			} else {
+				tiled.alert("Error: This map has no \"remappingMap\" custom property, and while multiple possible remapping maps are open in Tiled, your version of Tiled is too old, so the multiple options cannot be displayed. Please either create a custom File property called \"remappingMap\" and set it to the remapper you want to use, or make sure only a single remapping map is open in Tiled.");
+				return;
+			}
+			
+			
 		} else if(!remapper.url || remapper.url.length < 1) {
 			if(!massReplaceTiles.silentMode) tiled.alert("Error: The \"remappingMap\" custom property doesn't have a file set. It should point to your map of tile remappings.");
 			return;
 		}
-		remapper = tiled.open(remapper);
+		if(remapper && !remapper.isTileMap)
+			remapper = tiled.open(remapper);
 	}
 	if(!remapper || !remapper.isTileMap) {
 		if(!massReplaceTiles.silentMode) tiled.alert("Error: The \"remappingMap\" does not point to a valid Tiled Map.");
