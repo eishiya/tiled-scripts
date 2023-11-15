@@ -1,4 +1,4 @@
-/*	Move Tiles Tool by eishiya, last updated 28 Feb 2023
+/*	Move Tiles Tool by eishiya, last updated 15 Nov 2023
 
 	Adds a tool to your Map Toolbar that allows you to move selected tiles
 	relative to their original position using the mouse or the keyboard,
@@ -28,15 +28,17 @@
 	You can also use the keyboard to commit (Enter/Return) and cancel (Esc).
 	
 	Please note that this tool creates more Undo entries than a native tool
-	would, at least in Cut mode. Cutting out the tiles creates an Undo entry
-	for each affected layer. Cancelling creates an additional Undo entry when
-	the tiles are merged back into the map.
+	would. Cutting out the tiles creates an Undo entry. Cancelling creates
+	an additional Undo entry when the tiles are merged back into the map.
 	
 	In versions of Tiled before 1.8, only the bounding box of selections is
 	visible to scripts, so complex selections will not act as you might expect.
+	
+	TODO: Allow holding Shift at the start of dragging to make selections,
+	to avoid the need to toggle between this tool and selections as often.
 */
 
-var tool = tiled.registerTool("MoveTiles", {
+var moveTilesTool = tiled.registerTool("MoveTiles", {
 	name: "Move Tiles",
 	icon: "MoveTilesTool.png",
 	
@@ -218,8 +220,16 @@ var tool = tiled.registerTool("MoveTiles", {
 		if(this.cutTiles) this.tilesWereCut = true;
 		
 		//Add layers to the brush, and populate them:
-		if(this.addLayerToBrush(this.map, region) > 0) {
-			this.tilesChosen = true;
+		if(this.cutTiles) { //Merge all the cuts from all the layers into one step:
+			this.map.macro("Move Tiles (Cut)", function() {
+				if(moveTilesTool.addLayerToBrush(moveTilesTool.map, region) > 0) {
+					moveTilesTool.tilesChosen = true;
+				}
+			});
+		} else { //Don't do a macro because we're not going to produce any undoable steps:
+			if(this.addLayerToBrush(this.map, region) > 0) {
+				this.tilesChosen = true;
+			}
 		}
 	},
 	
@@ -285,7 +295,9 @@ var tool = tiled.registerTool("MoveTiles", {
 			let layerEdit = newLayer.edit();
 			for(let x = 0; x < this.brush.width; ++x) {
 				for(let y = 0; y < this.brush.height; ++y) {
-					layerEdit.setTile( offsetX + x, offsetY + y, brushLayer.tileAt(x, y), brushLayer.flagsAt(x, y) );
+					let tile = brushLayer.tileAt(x, y);
+					if(tile)
+						layerEdit.setTile( offsetX + x, offsetY + y, tile, brushLayer.flagsAt(x, y) );
 				}
 			}
 			layerEdit.apply();
