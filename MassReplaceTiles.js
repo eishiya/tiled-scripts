@@ -1,4 +1,4 @@
-/* 	Mass Replace Tiles script by eishiya, last updated 29 Oct 2023
+/* 	Mass Replace Tiles script by eishiya, last updated 18 Nov 2023
 
 	This script adds three actions to the Map menu to mass replace tiles in
 	a map, based on another map that provides the old tile -> new tile mappings.
@@ -151,16 +151,16 @@ let massReplaceTiles = tiled.registerAction("MassReplaceTiles", function(action)
 				
 				//It's valid, save it to the list:
 				maps.push(asset);
-				if(map.fileName) {
-					mapNames.push(FileInfo.fileName(map.fileName));
+				if(asset.fileName) {
+					mapNames.push(""+FileInfo.fileName(asset.fileName));
 				} else { //unsaved map
 					let mapName = "Unsaved map (";
 					
-					if(map.infinite) mapName += "infinite"; //TODO: Get used region?
-					else mapName += (map.width + " x " + map.height);
+					if(asset.infinite) mapName += "infinite"; //TODO: Get used region?
+					else mapName += (asset.width + " x " + asset.height);
 					
 					mapName += ")";
-					mapNames.push(mapName);
+					mapNames.push(""+mapName);
 				}
 			}
 			if(maps.length == 0) {
