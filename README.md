@@ -72,6 +72,9 @@ Replaces tiles *en masse*, according to a guide map that specifies the tile to r
 ### Modify Selection
 Expands and contracts (erodes) selections in maps.
 
+### Random Automap
+Enables additional syntax in Automapping rules.txt to apply random rules and apply rules conditionally based on earlier selections. Can be useful for procedural generation.
+
 ### Replace in Layer Name
 Renames selected layers by doing a search and replace in their name. Supports regular expressions.
 
