@@ -13,7 +13,6 @@ var deleteCollisions = tiled.registerAction("DeleteCollisions", function(action)
 	if(!tiles || tiles.length < 1)
 		return;
 	
-	//Recursively iterate all the selected layers and also select their children:
 	tileset.macro("Delete Collisions", function() {
 		let numTiles = tiles.length;
 		for(let i = 0; i < numTiles; i++) {
