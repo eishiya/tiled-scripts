@@ -1,4 +1,4 @@
-/* 	Mass Replace Tiles script by eishiya, last updated 18 Nov 2023
+/* 	Mass Replace Tiles script by eishiya, last updated 29 Feb 2023
 
 	This script adds three actions to the Map menu to mass replace tiles in
 	a map, based on another map that provides the old tile -> new tile mappings.
@@ -21,6 +21,8 @@
 	
 	All instances of the old tiles will be replaced by the corresponding
 	new tiles, both when used on Tile Layers, and when used as Tile Objects.
+	
+	A remapping map will never remap itself, so you can reuse it.
 	
 	Requires Tiled 1.8+, but works best in 1.9+.
 	Mass Replace Tiles in Project requires Tiled 1.10.1+.
@@ -79,11 +81,10 @@
 	convenient. If you *do* want to replace tiles with empty, set
 	allowReplaceWithEmpty to true below.
 	
-	The mass replacer will not run a remapping map on itself, so don't worry
-	about messing it up by accidentally running the mass replacer on it.
-	However, it IS possible to mess up a remapping map by applying a different
+	Although the mass replacer will never modify the remapping map it's using
+	currently, it IS possible to mess up a remapping map by applying a different
 	remapping map to it, so make sure that if you're using the batch replacer,
-	you only have one remapping map at a time, and that you never have
+	you only have one remapping map open at a time, and that you never have
 	a "remappingMap" property on a remapping map.
 	
 	You can replace tiles within a single tileset, replace tiles from one
@@ -91,7 +92,7 @@
 	
 	If you're using this script to aid in the reorganization of a single
 	tileset, I recommend making the new version a separate tileset, so you
-	can see both old and new tiles correctly in your remapping and can see
+	can see both old and new tiles correctly in your remapping, and can see
 	how the riles correspond to one another.
 	
 	If a tile appears more than once in the "old" layer, the first mapping found
@@ -152,7 +153,7 @@ let massReplaceTiles = tiled.registerAction("MassReplaceTiles", function(action)
 				//It's valid, save it to the list:
 				maps.push(asset);
 				if(asset.fileName) {
-					mapNames.push(""+FileInfo.fileName(asset.fileName));
+					mapNames.push(FileInfo.fileName(asset.fileName));
 				} else { //unsaved map
 					let mapName = "Unsaved map (";
 					
@@ -160,7 +161,7 @@ let massReplaceTiles = tiled.registerAction("MassReplaceTiles", function(action)
 					else mapName += (asset.width + " x " + asset.height);
 					
 					mapName += ")";
-					mapNames.push(""+mapName);
+					mapNames.push(mapName);
 				}
 			}
 			if(maps.length == 0) {
@@ -337,6 +338,7 @@ let massReplaceBatch = tiled.registerAction("MassReplaceBatch", function(action)
 	
 	remapper = tiled.activeAsset;
 	let remapperIsValid = true;
+	let remapperHasOtherLayers = false; //show a warning if the map has extra layers
 	if(!remapper || !remapper.isTileMap) {
 		remapperIsValid = false;
 	} else {
@@ -347,13 +349,14 @@ let massReplaceBatch = tiled.registerAction("MassReplaceBatch", function(action)
 				oldTiles = true;
 			else if(layer.name.toLowerCase() == "new" && layer.isTileLayer)
 				newTiles = true;
+			else remapperHasOtherLayers = true;
 		}
 		if(!oldTiles || !newTiles) {
 			remapperIsValid = false;
 		}
 	}
 	if(remapperIsValid)
-		remapperIsValid = tiled.confirm("The active map appears to be a valid remapping map. Would you like to use it for this batch?\nIf you select No, the mass replacer will look for a \"remappingMap\" property on each map.");
+		remapperIsValid = tiled.confirm("The active map appears to be a valid remapping map. Would you like to use it for this batch?\nIf you select No, the mass replacer will look for a \"remappingMap\" property on each map." + (remapperHasOtherLayers? "\n\nNote: This map contains additional, non-remapping layers. If you want to perform mass replacement on these, you should use a separate remapping map, as this remapping map will not perform a replacement on itself." : ""));
 	if(remapperIsValid) {
 		massReplaceTiles.remapperMap = remapper;
 	}
@@ -386,6 +389,7 @@ if(projectAvailable) {
 		
 		remapper = tiled.activeAsset;
 		let remapperIsValid = true;
+		let remapperHasOtherLayers = false; //show a warning if the map has extra layers
 		if(!remapper || !remapper.isTileMap) {
 			remapperIsValid = false;
 		} else {
@@ -396,13 +400,14 @@ if(projectAvailable) {
 					oldTiles = true;
 				else if(layer.name.toLowerCase() == "new" && layer.isTileLayer)
 					newTiles = true;
+				else remapperHasOtherLayers = true;
 			}
 			if(!oldTiles || !newTiles) {
 				remapperIsValid = false;
 			}
 		}
 		if(remapperIsValid)
-			remapperIsValid = tiled.confirm("The active map appears to be a valid remapping map. Would you like to use it for this batch?\nIf you select No, the mass replacer will look for a \"remappingMap\" property on each map.");
+			remapperIsValid = tiled.confirm("The active map appears to be a valid remapping map. Would you like to use it for this batch?\nIf you select No, the mass replacer will look for a \"remappingMap\" property on each map." + (remapperHasOtherLayers? "\n\nNote: This map contains additional, non-remapping layers. If you want to perform mass replacement on these, you should use a separate remapping map, as this remapping map will not perform a replacement on itself." : ""));
 		if(remapperIsValid) {
 			massReplaceTiles.remapperMap = remapper;
 		} else if(!tiled.confirm("Are you sure you'd like to run the mass replacer on all maps in the project? Any maps that aren't already open will be saved and closed after modification, so you will not be able to Undo!")) {
