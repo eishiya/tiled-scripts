@@ -60,6 +60,12 @@ Counts the tiles used in a map, useful for e.g. GB Studio where the unique tiles
 ### Delete Collisions
 Deletes collision shapes from selected tiles in a Tileset.
 
+### Find Tiles in Project
+Finds instances of specific tiles across all the maps in your Project.
+
+### Flip Tiles in Brush
+Flips the tiles in your current brush stamp without flipping the stamp itself.
+
 ### Image to Map
 Generates a TileMap based on a source image by matching colours from the image to tiles, using user-defined color: tileID pairs. Useful for turning schematic map sketches into TileMaps.
 
