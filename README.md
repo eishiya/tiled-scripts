@@ -87,6 +87,9 @@ Renames selected layers by doing a search and replace in their name. Supports re
 ### Select Child Layers
 Recursively selects the child layers of all selected groups.
 
+### Select Layer Tiles
+Selects all the non-empty cells in a layer, letting you use a layer as a selection.
+
 ### Spreadsheet Actions
 Inserts and deletes rows and columns in your map, making it easier to expand and contract your map. Can also shift Objects over to match.
 
