@@ -12,7 +12,6 @@ const selectLayerTiles = tiled.registerAction("SelectLayerTiles", function(actio
 	if(!map || !map.isTileMap)
 		return;
 	
-	//let layer = map.currentLayer;
 	let layersSelected = 0;
 	for(let layer of map.selectedLayers) {
 		if(!layer.isTileLayer)
@@ -34,7 +33,7 @@ selectLayerTiles.updateActive = function() {
 		selectLayerTiles.previousAsset.selectedLayersChanged.disconnect(selectLayerTiles.updateActive);
 	}
 	let asset = tiled.activeAsset;
-	if(asset.isTileMap) {
+	if(asset && asset.isTileMap) {
 		selectLayerTiles.previousAsset = asset;
 		asset.selectedLayersChanged.connect(selectLayerTiles.updateActive);
 		
