@@ -1,4 +1,4 @@
-/* 	Tileset Heatmap script by eishiya, last updated 2 May 2023
+/* 	Tileset Heatmap script by eishiya, last updated 20 May 2024
 
 	Adds an action to the Tileset menu that generates a heatmap of the tileset,
 	showing how many times each tile is used, allowing you to find tiles that
@@ -122,11 +122,11 @@ var tilesetHeatmap = tiled.registerAction("TilesetHeatmap", function(action) {
 	for(map of maps) {
 		if(!map.isTileMap) { //If it's not a TileMap, it's a file path string
 			map = tiled.open(map);
-			if(map.isTileMap && map.property("ExcludeFromHeatmaps") != true)
+			if(map.isTileMap && map.property("ExcludeFromHeatmaps") != true && map.tilesets.includes(tileset))
 				countTiles(map);
 			tiled.close(map);
-		} else
-			countTiles(map);
+		} else if(map.tilesets.includes(tileset))
+				countTiles(map);
 	}
 
 	if(maxCount < 1) {
