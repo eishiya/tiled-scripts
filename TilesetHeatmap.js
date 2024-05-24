@@ -9,13 +9,21 @@
 	You can exclude individual maps from being counted by adding a boolean
 	property to the map called "ExcludeFromHeatmaps" and setting it to true.
 	
+	By default, the script scans all the folders added to a project, and their
+	subfolders. If you only want to scan those folders that are explicitly part
+	of the project, set "scanSubfolders" to false below. If you're explicitly
+	adding subfolders to the Project, you may want to do this to avoid some maps
+	being counted multiple times.
+	
 	Requires Tiled 1.9+. Scanning the entire project requires Tiled 1.10.1+.
 	
 	TODO: Use the final Project API when it's available. collectMaps() may not be necessary!
 	TODO: Make project-scanning optional; sometimes one may *want* to scan only open maps.
 */
 var tilesetHeatmap = tiled.registerAction("TilesetHeatmap", function(action) {
-	let scanSubfolders = true; //Set to false if you only want to scan the top directory of the project but not the subdirectories.
+	/* ======================== CONFIG ======================== */
+	let scanSubfolders = true; //Set to false if you only want to scan the directories added to the project but not the subdirectories.
+	/* ====================== END CONFIG ====================== */
 	
 	let tileset = tiled.activeAsset;
 	if(!tileset || !tileset.isTileset)
@@ -48,13 +56,14 @@ var tilesetHeatmap = tiled.registerAction("TilesetHeatmap", function(action) {
 			if(format) {
 				let map = getOpenMap(path);
 				if(map)
-					if(map.property("ExcludeFromHeatmaps") != true)
-						maps.push(map);
+					maps.push(map);
 				else
 					maps.push(path);
 			} //else there's no map format that can read this file, it's not a Tiled map, skip it.
 		}
 		//Then, look at any subfolders:
+		if(tilesetHeatmap.scanSubfolders === false)
+			return;
 		files = File.directoryEntries(folder, File.Dirs | File.Readable | File.NoDotAndDotDot);
 		for(file of files) {
 			collectMaps(folder+"/"+file);
@@ -72,7 +81,7 @@ var tilesetHeatmap = tiled.registerAction("TilesetHeatmap", function(action) {
 	if(maps.length == 0) {
 		if( !tiled.project || tiled.confirm("Scan open maps?") ) {
 			for(asset of tiled.openAssets) {
-				if(asset.isTileMap && asset.property("ExcludeFromHeatmaps") != true)
+				if(asset.isTileMap)
 					maps.push(asset);
 			}
 		}
@@ -126,8 +135,8 @@ var tilesetHeatmap = tiled.registerAction("TilesetHeatmap", function(action) {
 			if(map.isTileMap && map.property("ExcludeFromHeatmaps") != true && map.tilesets.includes(tileset))
 				countTiles(map);
 			tiled.close(map);
-		} else if(map.tilesets.includes(tileset))
-				countTiles(map);
+		} else if(map.property("ExcludeFromHeatmaps") != true && map.tilesets.includes(tileset))
+			countTiles(map);
 	}
 
 	if(maxCount < 1) {
