@@ -26,6 +26,10 @@
 	so if you save the map without the tilesets being there, the tiles will be
 	empty when you load the map.
 	
+	CAUTION: Tiled's scripting API doesn't provide access to templates, so any
+	Objects created from Templates will not be copied correctly. Do not use
+	this script to copy Object Layers if you use templates.
+	
 	Possibly planned for the future:
 	Paste Layers (Merge): Would paste the layers, but attempt to paste into
 		existing layers (matching by name and group path) where possible.
