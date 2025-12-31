@@ -159,12 +159,17 @@ copyPasteAnimations.pasteAnimations = tiled.registerAction("PasteTileAnimations"
 		for(let dst = 0; dst < selectedTiles.length; ++dst) {
 			let dstTile = selectedTiles[dst];
 			if(copyPasteAnimations.copiedFrom.length == 1) {
-				copyPasteAnimations.pasteAnimation(dstTile, copyPasteAnimations.copiedFrom[0], copyPasteAnimations.copiedAnimations[0]);
+				// When pasting to multiple tiles, we need to deep-copy the frames,
+				// because the paste function may modify them.
+				let framesCopy = JSON.parse(JSON.stringify(copyPasteAnimations.copiedAnimations[0]));
+				copyPasteAnimations.pasteAnimation(dstTile, copyPasteAnimations.copiedFrom[0], framesCopy);
 				continue;
 			}
 			if(dst >= copyPasteAnimations.copiedFrom.length)
 				break;
-			copyPasteAnimations.pasteAnimation(dstTile, copyPasteAnimations.copiedFrom[dst], copyPasteAnimations.copiedAnimations[dst]);
+			// We probably don't need to copy here, but for safety...
+			let framesCopy = JSON.parse(JSON.stringify(copyPasteAnimations.copiedAnimations[dst]));
+			copyPasteAnimations.pasteAnimation(dstTile, copyPasteAnimations.copiedFrom[dst], framesCopy);
 		}
 	});
 });
