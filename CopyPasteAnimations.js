@@ -1,4 +1,4 @@
-/* 	Copy+Paste Animations by eishiya, last updated 13 May 2023
+/* 	Copy+Paste Animations by eishiya, last updated 31 Dec 2025
 
 	Adds actions to the Tileset menu and tile right-click menus to
 	Copy, Cut, and Paste Animations between tiles.
@@ -11,15 +11,15 @@
 	In addition, multiple Paste Modes are supported, which you can change by
 	clicking the "Paste mode: ..." action in the Tileset menu.
 	  - Exact: keep the animation entirely unchanged, just copy it
-	    to the target tile.
+		to the target tile.
 	  - Adjust ID: adjust each frame's tile ID by the difference between
-	    the source tile's ID and destination tile's ID.
+		the source tile's ID and destination tile's ID.
 	  - Adjust Position: adjust each frame's tile ID based on the relative
-	    position of the source tile and destination tile. Positions will wrap
+		position of the source tile and destination tile. Positions will wrap
 		around the columns and rows as needed. Accounts for tile order.
 		Be careful when using this with Dynamic Wrap enabled! The positions
 		are based on the un-wrapped positions, using the tileset's column count.
-	
+
 	It is possible to copy+paste animations across tilesets, but this has
 	not been extensively tested.
 
@@ -58,7 +58,7 @@ let copyPasteAnimations = {
 			let difference = dstTile.id - srcTile.id;
 			let adjustedFrames = [];
 			for(let f = 0; f < newFrames.length; ++f) {
-				let newFrame = newFrames[f];
+				let newFrame = Object.assign({}, newFrames[f]); //shallow copy of the frame since we're modifying it
 				newFrame.tileId += difference;
 				adjustedFrames.push(newFrame);
 			}
@@ -87,7 +87,7 @@ let copyPasteAnimations = {
 			
 			let adjustedFrames = [];
 			for(let f = 0; f < newFrames.length; ++f) {
-				let newFrame = newFrames[f];
+				let newFrame = Object.assign({}, newFrames[f]); //shallow copy of the frame since we're modifying it
 				let newTileId = newFrame.tileId;
 				let newIndex = srcTiles.indexOf(srcTileset.tile(newTileId));
 				let newX = newIndex % srcColumns, newY = Math.floor(newIndex / srcColumns);
